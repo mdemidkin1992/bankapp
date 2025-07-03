@@ -1,0 +1,3 @@
+server:
+  port: ${services.service-a.port}
+test-property: "Test property A"

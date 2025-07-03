@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: service-gateway
+  # Config Server
+  config:
+    import: configserver:http://127.0.0.1:8888
+  # Cloud
+  cloud:
+    # Gateway
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: service-a-route
+              uri: ${services.service-a.url}
+              predicates:
+                - Path=/service-a/**
+              filters:
+                - RewritePath=/service-a/?(?<segment>.*), /$\{segment}
+            - id: service-b-route
+              uri: ${services.service-b.url}
+              predicates:
+                - Path=/service-b/**
+              filters:
+                - RewritePath=/service-b/?(?<segment>.*), /$\{segment}
+
+logging:
+  level:
+    web: debug
