@@ -1,9 +1,11 @@
 spring:
   application:
     name: service-gateway
+
   # Config Server
   config:
-    import: configserver:http://127.0.0.1:8888
+    import: configserver:${CONFIG_SERVER_URL:http://127.0.0.1:8888}
+
   # Cloud
   cloud:
     # Zookeeper
@@ -18,14 +20,12 @@ spring:
           routes:
             - id: service-a-route
               uri: lb://service-a
-#              uri: ${services.service-a.url}
               predicates:
                 - Path=/service-a/**
               filters:
                 - RewritePath=/service-a/?(?<segment>.*), /$\{segment}
             - id: service-b-route
               uri: lb://service-b
-#              uri: ${services.service-b.url}
               predicates:
                 - Path=/service-b/**
               filters:

@@ -1,5 +1,72 @@
 version: '3'
 services:
+  config-server-app:
+    image: config-server-app:latest
+    build:
+      context: .
+      dockerfile: config-server/Dockerfile
+    environment:
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+    ports:
+      - "8888:8888"
+    depends_on:
+      - zookeeper
+    networks:
+      - app_network
+
+  service-a-app:
+    image: service-a-app:latest
+    build:
+      context: .
+      dockerfile: service-a/Dockerfile
+    environment:
+      CONFIG_SERVER_URL: http://config-server-app:8888
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+    ports:
+      - "8081:8081"
+    depends_on:
+      - zookeeper
+      - config-server-app
+    restart: on-failure
+    networks:
+      - app_network
+
+  service-b-app:
+    image: service-b-app:latest
+    build:
+      context: .
+      dockerfile: service-b/Dockerfile
+    environment:
+      CONFIG_SERVER_URL: http://config-server-app:8888
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+    ports:
+      - "8082:8082"
+    depends_on:
+      - zookeeper
+      - config-server-app
+    restart: on-failure
+    networks:
+      - app_network
+
+  service-gateway-app:
+    image: service-gateway-app:latest
+    build:
+      context: .
+      dockerfile: service-gateway/Dockerfile
+    environment:
+      CONFIG_SERVER_URL: http://config-server-app:8888
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+    ports:
+      - "8080:8080"
+    depends_on:
+      - zookeeper
+      - config-server-app
+      - service-a-app
+      - service-b-app
+    restart: on-failure
+    networks:
+      - app_network
+
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     environment:
