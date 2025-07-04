@@ -27,6 +27,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.cloud:spring-cloud-starter-config")
+    implementation("org.springframework.cloud:spring-cloud-starter-zookeeper-discovery")
 //    implementation("org.springframework.cloud:spring-cloud-starter-consul-discovery")
 //    implementation 'org.springframework.cloud:spring-cloud-starter-bus-amqp'// Для работы Spring Cloud Bus c RabbitMQ
 

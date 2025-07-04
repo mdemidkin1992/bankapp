@@ -1,0 +1,15 @@
+version: '3'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    tmpfs: "/datalog"
+    ports:
+      - "22181:2181"
+    networks:
+      - app_network
+
+networks:
+  app_network:

@@ -5,6 +5,14 @@ spring:
   config:
     import: configserver:http://127.0.0.1:8888
 
+  # Cloud
+  cloud:
+    # Zookeeper
+    zookeeper:
+      discovery:
+        enabled: true
+      connect-string: localhost:2181
+
 logging:
   level:
     web: debug

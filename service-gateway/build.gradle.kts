@@ -29,6 +29,7 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-config")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("org.springframework.cloud:spring-cloud-gateway-server-webmvc")
+    implementation("org.springframework.cloud:spring-cloud-starter-zookeeper-discovery")
 
 //    implementation("org.springframework.cloud:spring-cloud-starter-consul-discovery")
 

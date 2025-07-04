@@ -10,3 +10,7 @@ spring:
       server:
         native:
           search-locations: classpath:/config-repo/
+    zookeeper:
+      discovery:
+        enabled: true
+      connect-string: localhost:2181

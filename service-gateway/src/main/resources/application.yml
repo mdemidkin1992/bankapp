@@ -6,19 +6,26 @@ spring:
     import: configserver:http://127.0.0.1:8888
   # Cloud
   cloud:
+    # Zookeeper
+    zookeeper:
+      discovery:
+        enabled: true
+      connect-string: localhost:2181
     # Gateway
     gateway:
       server:
         webmvc:
           routes:
             - id: service-a-route
-              uri: ${services.service-a.url}
+              uri: lb://service-a
+#              uri: ${services.service-a.url}
               predicates:
                 - Path=/service-a/**
               filters:
                 - RewritePath=/service-a/?(?<segment>.*), /$\{segment}
             - id: service-b-route
-              uri: ${services.service-b.url}
+              uri: lb://service-b
+#              uri: ${services.service-b.url}
               predicates:
                 - Path=/service-b/**
               filters:
