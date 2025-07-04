@@ -1,6 +1,8 @@
 spring:
   application:
     name: service-gateway
+  main:
+    allow-bean-definition-overriding: true # убрать после dev
 
   # Config Server
   config:
@@ -16,7 +18,7 @@ spring:
     # Gateway
     gateway:
       server:
-        webmvc:
+        webflux:
           routes:
             - id: service-a-route
               uri: lb://service-a
@@ -41,14 +43,30 @@ spring:
         provider:
           keycloak:
             token-uri: http://localhost:8180/realms/bankapp/protocol/openid-connect/token
+            authorization-uri: http://localhost:8180/realms/bankapp/protocol/openid-connect/auth
+            jwk-set-uri: http://localhost:8180/realms/bankapp/protocol/openid-connect/certs
         registration:
           bankapp-client:
             client-id: bankapp-client
             client-secret: VmGXQDXNGOZzJH5Mx7Fi4OyHtnb3IH8A
-            authorization-grant-type: authorization_code
+            authorization-grant-type: client_credentials
             scope: openid
             provider: keycloak
 
+  # Liquibase
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: true
+    drop-first: true
+
+  # Datasource (reactive)
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/gateway-db
+    username: postgres
+    password: postgres
+
+# Logging
 logging:
   level:
-    web: debug
+    web: trace
+    org.springframework.security: trace

@@ -22,6 +22,7 @@ services:
     environment:
       CONFIG_SERVER_URL: http://config-server-app:8888
       SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
     ports:
       - "8081:8081"
     depends_on:
@@ -39,6 +40,7 @@ services:
     environment:
       CONFIG_SERVER_URL: http://config-server-app:8888
       SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
     ports:
       - "8082:8082"
     depends_on:
@@ -56,15 +58,35 @@ services:
     environment:
       CONFIG_SERVER_URL: http://config-server-app:8888
       SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_R2DBC_URL: r2dbc:postgresql://gateway-postgres:5432/gateway-db
+      SPRING_R2DBC_USERNAME: postgres
+      SPRING_R2DBC_PASSWORD: postgres
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_AUTHORIZATION_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/auth
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKEN_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/token
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_CLIENT_ID: bankapp-client
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_CLIENT_SECRET: VmGXQDXNGOZzJH5Mx7Fi4OyHtnb3IH8A
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_PROVIDER: keycloak
     ports:
       - "8080:8080"
     depends_on:
       - zookeeper
-      - config-server-app
-      - service-a-app
-      - service-b-app
+#      - config-server-app
+#      - service-a-app
+#      - service-b-app
       - keycloak
-    restart: on-failure
+#    restart: on-failure
+    networks:
+      - app_network
+
+  gateway-postgres:
+    image: postgres:16.1-alpine
+    environment:
+      POSTGRES_DB: gateway-db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
     networks:
       - app_network
 
