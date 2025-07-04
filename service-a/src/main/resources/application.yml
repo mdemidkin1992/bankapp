@@ -14,6 +14,13 @@ spring:
         enabled: true
       connect-string: localhost:2181
 
+  # Security
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8180/realms/bankapp/protocol/openid-connect/certs
+
 logging:
   level:
     web: debug

@@ -31,6 +31,8 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("org.springframework.cloud:spring-cloud-gateway-server-webmvc")
     implementation("org.springframework.cloud:spring-cloud-starter-zookeeper-discovery")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+    implementation("org.springframework.boot:spring-boot-starter-security")
 
 //    implementation("org.springframework.cloud:spring-cloud-starter-consul-discovery")
 

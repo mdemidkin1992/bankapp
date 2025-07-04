@@ -14,14 +14,19 @@ public class TestController {
     @Value("${test-property}")
     private String testProperty;
 
-//    private final ServiceBClient client;
-//
-//    public TestController(ServiceBClient client) {
-//        this.client = client;
-//    }
+    private final ServiceBClient client;
+
+    public TestController(ServiceBClient client) {
+        this.client = client;
+    }
 
     @GetMapping
     public ResponseEntity<String> test() {
         return ResponseEntity.ok(testProperty);
+    }
+
+    @GetMapping("/b")
+    public ResponseEntity<String> testClient() {
+        return ResponseEntity.ok("Forward to service B: " + client.sendRequest());
     }
 }
