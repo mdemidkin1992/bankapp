@@ -15,7 +15,8 @@ spring:
       discovery:
         enabled: true
       connect-string: localhost:2181
-    # Gateway
+
+    # Gateway (service-locator)
     gateway:
       server:
         webflux:
@@ -34,6 +35,13 @@ spring:
                 - Path=/service-b/**
               filters:
                 - RewritePath=/service-b/?(?<segment>.*), /$\{segment}
+                - TokenRelay=bankapp-client
+
+            - id: service-front-route
+              uri: lb://service-front
+              predicates:
+                - Path=/signup
+              filters:
                 - TokenRelay=bankapp-client
 
   # Security

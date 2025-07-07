@@ -5,5 +5,5 @@ import reactor.core.publisher.Mono;
 import ru.mdemidkin.gateway.model.User;
 
 public interface UserRepository extends R2dbcRepository<User, Long> {
-    Mono<User> findByUsername(String username);
+    Mono<User> findByLogin(String login);
 }

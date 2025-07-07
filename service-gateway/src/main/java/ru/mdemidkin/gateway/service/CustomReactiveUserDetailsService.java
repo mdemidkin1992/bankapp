@@ -20,14 +20,14 @@ public class CustomReactiveUserDetailsService implements ReactiveUserDetailsServ
 
     @Override
     public Mono<UserDetails> findByUsername(String username) {
-        return userRepository.findByUsername(username)
+        return userRepository.findByLogin(username)
                 .map(this::mapToUserDetails)
                 .switchIfEmpty(Mono.error(new UsernameNotFoundException("Пользователь не найден: " + username)));
     }
 
     private UserDetails mapToUserDetails(User user) {
         return new org.springframework.security.core.userdetails.User(
-                user.getUsername(),
+                user.getLogin(),
                 user.getPassword(),
                 List.of(new SimpleGrantedAuthority(user.getRole())));
     }
