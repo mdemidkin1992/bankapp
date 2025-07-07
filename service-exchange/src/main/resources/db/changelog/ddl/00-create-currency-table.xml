@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+     https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="01-create-currency-table" author="Maxim Demidkin">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="currency"/>
+            </not>
+        </preConditions>
+
+        <sql>
+            CREATE TABLE currency
+            (
+                id    BIGSERIAL      PRIMARY KEY,
+                title VARCHAR(255)   NOT NULL,
+                name  VARCHAR(255)   NOT NULL,
+                value DECIMAL(10, 2) NOT NULL
+            );
+        </sql>
+
+        <rollback>
+            DROP TABLE IF EXISTS currency;
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

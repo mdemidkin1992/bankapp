@@ -4,11 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import ru.mdemidkin.gateway.model.User;
-import ru.mdemidkin.gateway.repository.UserRepository;
+import ru.mdemidkin.libdto.UserDto;
 
 import java.util.List;
 
@@ -16,19 +15,23 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CustomReactiveUserDetailsService implements ReactiveUserDetailsService {
 
-    private final UserRepository userRepository;
+    private final WebClient accountsClient;
+    private static final String ACCOUNTS_BASE_URL = "http://service-accounts";
 
     @Override
     public Mono<UserDetails> findByUsername(String username) {
-        return userRepository.findByLogin(username)
-                .map(this::mapToUserDetails)
-                .switchIfEmpty(Mono.error(new UsernameNotFoundException("Пользователь не найден: " + username)));
+        return accountsClient
+                .get()
+                .uri(ACCOUNTS_BASE_URL + "/api/users/{username}", username)
+                .retrieve()
+                .bodyToMono(UserDto.class)
+                .map(this::mapToUserDetails);
     }
 
-    private UserDetails mapToUserDetails(User user) {
+    private UserDetails mapToUserDetails(UserDto userDto) {
         return new org.springframework.security.core.userdetails.User(
-                user.getLogin(),
-                user.getPassword(),
-                List.of(new SimpleGrantedAuthority(user.getRole())));
+                userDto.getLogin(),
+                userDto.getPassword(),
+                List.of(new SimpleGrantedAuthority(userDto.getRole())));
     }
 }

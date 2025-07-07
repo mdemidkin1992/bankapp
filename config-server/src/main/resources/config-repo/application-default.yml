@@ -2,14 +2,6 @@ host: 127.0.0.1
 base-url: http://${host}
 
 services:
-  service-a:
-    host: ${host}
-    port: 8081
-    url: ${base-url}:${services.service-a.port}
-  service-b:
-    host: ${host}
-    port: 8082
-    url: ${base-url}:${services.service-b.port}
   service-gateway:
     host: ${host}
     port: 8080
@@ -22,6 +14,14 @@ services:
     host: ${host}
     port: 8083
     url: ${base-url}:${services.service-front.port}
+  service-accounts:
+    host: ${host}
+    port: 8084
+    url: ${base-url}:${services.service-accounts.port}
+  service-exchange:
+    host: ${host}
+    port: 8085
+    url: ${base-url}:${services.service-exchange.port}
 
 management:
   endpoints:

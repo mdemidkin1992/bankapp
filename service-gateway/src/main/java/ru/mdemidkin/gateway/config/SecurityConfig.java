@@ -26,9 +26,8 @@ public class SecurityConfig {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
-//                        .pathMatchers("/").permitAll()
-//                        .pathMatchers("/", "/login", "/logout").permitAll()
-                        .anyExchange().authenticated()
+                                .pathMatchers("/api/rates").permitAll()
+                                .anyExchange().authenticated()
                 )
                 .formLogin(withDefaults())
                 .logout(withDefaults())

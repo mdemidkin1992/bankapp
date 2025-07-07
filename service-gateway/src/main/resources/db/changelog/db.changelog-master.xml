@@ -7,6 +7,6 @@
 
     <include file="/db/changelog/ddl/00-create-users-table.xml"/>
 
-    <include file="/db/changelog/dml/00-insert-users-table.sql"/>
+    <include file="/db/changelog/dml/00-insert-currency-table.sql"/>
 
 </databaseChangeLog>
