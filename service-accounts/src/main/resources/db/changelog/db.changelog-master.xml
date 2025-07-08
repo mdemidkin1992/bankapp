@@ -6,6 +6,7 @@
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
 
     <include file="/db/changelog/ddl/00-create-users-table.xml"/>
+    <include file="/db/changelog/ddl/01-create-accounts-table.xml"/>
 
     <include file="/db/changelog/dml/00-insert-users-table.sql"/>
 

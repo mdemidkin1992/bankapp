@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+     https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="01-create-accounts-table" author="Maxim Demidkin">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="accounts"/>
+            </not>
+        </preConditions>
+
+        <sql>
+            CREATE TABLE accounts
+            (
+                id         BIGSERIAL PRIMARY KEY,
+                user_id    BIGINT         NOT NULL,
+                currency   VARCHAR(3)     NOT NULL,
+                balance    DECIMAL(19, 2) NOT NULL DEFAULT 0.00,
+                created_at TIMESTAMP               DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP               DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+                UNIQUE (user_id, currency)
+            );
+        </sql>
+
+        <rollback>
+            DROP TABLE IF EXISTS accounts;
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

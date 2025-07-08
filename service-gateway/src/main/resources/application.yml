@@ -56,6 +56,13 @@ spring:
               filters:
                 - TokenRelay=bankapp-client
 
+            - id: edit-accounts-route
+              uri: lb://service-accounts
+              predicates:
+                - Path=/user/{login}/editUserAccounts
+              filters:
+                - TokenRelay=bankapp-client
+
   # Security
   security:
     oauth2:
