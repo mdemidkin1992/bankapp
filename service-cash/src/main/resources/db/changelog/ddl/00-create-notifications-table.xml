@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+     https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="00-create-notifications-table" author="Maxim Demidkin">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="notifications"/>
+            </not>
+        </preConditions>
+
+        <sql>
+            CREATE TABLE notifications
+            (
+                id      BIGSERIAL PRIMARY KEY,
+                login   VARCHAR(255) NOT NULL,
+                message VARCHAR(255) NOT NULL,
+                time    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+        </sql>
+
+        <rollback>
+            DROP TABLE IF EXISTS notifications;
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

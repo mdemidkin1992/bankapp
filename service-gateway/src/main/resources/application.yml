@@ -63,6 +63,13 @@ spring:
               filters:
                 - TokenRelay=bankapp-client
 
+            - id: cash-route
+              uri: lb://service-cash
+              predicates:
+                - Path=/user/{login}/сash
+              filters:
+                - TokenRelay=bankapp-client
+
   # Security
   security:
     oauth2:

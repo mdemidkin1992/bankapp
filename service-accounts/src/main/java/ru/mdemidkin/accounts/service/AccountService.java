@@ -1,18 +1,26 @@
 package ru.mdemidkin.accounts.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import ru.mdemidkin.accounts.exception.AccountNotFoundException;
+import ru.mdemidkin.accounts.exception.InsufficientFundsException;
 import ru.mdemidkin.accounts.model.Account;
 import ru.mdemidkin.accounts.repository.AccountRepository;
 import ru.mdemidkin.accounts.repository.UserRepository;
+import ru.mdemidkin.libdto.CashAction;
+import ru.mdemidkin.libdto.CashOperationRequest;
+import ru.mdemidkin.libdto.CashRequest;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AccountService {
@@ -62,5 +70,35 @@ public class AccountService {
         return userRepository.findByLogin(login)
                 .switchIfEmpty(Mono.error(new UsernameNotFoundException("Пользователь не найден: " + login)))
                 .flatMapMany(user -> accountRepository.findByUserId(user.getId()));
+    }
+
+    public Mono<Void> updateCashBalance(String login, CashRequest cashRequest) {
+        return userRepository.findByLogin(login)
+                .switchIfEmpty(Mono.error(new UsernameNotFoundException("Пользователь не найден: " + login)))
+                .flatMap(user -> accountRepository.findByUserIdAndCurrency(user.getId(), cashRequest.getCurrency())
+                        .switchIfEmpty(Mono.error(new AccountNotFoundException("Счет не найден для валюты: " + cashRequest.getCurrency())))
+                        .flatMap(account -> {
+                            BigDecimal newBalance = getBigDecimal(cashRequest, account);
+                            account.setBalance(newBalance);
+                            account.setUpdatedAt(LocalDateTime.now());
+                            return accountRepository.save(account);
+                        })
+                )
+                .then();
+    }
+
+    private static BigDecimal getBigDecimal(CashRequest cashRequest, Account account) {
+        CashAction action = cashRequest.getAction();
+        BigDecimal newBalance;
+        if (Objects.requireNonNull(action) == CashAction.PUT) {
+            newBalance = account.getBalance().add(new BigDecimal(cashRequest.getValue()));
+        } else {
+            newBalance = account.getBalance().subtract(new BigDecimal(cashRequest.getValue()));
+        }
+        if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
+            return BigDecimal.ZERO;
+        }
+
+        return newBalance;
     }
 }

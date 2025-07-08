@@ -8,4 +8,5 @@ import ru.mdemidkin.accounts.model.Account;
 public interface AccountRepository extends R2dbcRepository<Account, Long> {
     Flux<Account> findByUserId(Long userId);
     Mono<Void> deleteByUserIdAndCurrency(Long userId, String currency);
+    Mono<Account> findByUserIdAndCurrency(Long id, String currency);
 }

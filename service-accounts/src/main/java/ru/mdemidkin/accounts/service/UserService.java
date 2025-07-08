@@ -66,9 +66,13 @@ public class UserService {
         return userRepository.findByLogin(login)
                 .switchIfEmpty(Mono.error(new UsernameNotFoundException("Пользователь не найден: " + login)))
                 .flatMap(user -> {
-                    LocalDate birthdate = LocalDate.parse(editAccountsRequest.getBirthdate());
-                    user.setName(editAccountsRequest.getName());
-                    user.setBirthdate(birthdate);
+                    if (editAccountsRequest.getName() != null && !editAccountsRequest.getName().isBlank()) {
+                        user.setName(editAccountsRequest.getName());
+                    }
+                    if (editAccountsRequest.getBirthdate() != null && !editAccountsRequest.getBirthdate().isBlank()) {
+                        LocalDate birthdate = LocalDate.parse(editAccountsRequest.getBirthdate());
+                        user.setBirthdate(birthdate);
+                    }
                     return userRepository.save(user);
                 });
 

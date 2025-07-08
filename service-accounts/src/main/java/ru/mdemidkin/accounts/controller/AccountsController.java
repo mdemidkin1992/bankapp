@@ -1,7 +1,6 @@
 package ru.mdemidkin.accounts.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
@@ -9,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -22,6 +22,7 @@ import ru.mdemidkin.accounts.service.UserService;
 import ru.mdemidkin.accounts.validation.ValidSignup;
 import ru.mdemidkin.accounts.validation.ValidationUtils;
 import ru.mdemidkin.libdto.AccountDto;
+import ru.mdemidkin.libdto.CashRequest;
 import ru.mdemidkin.libdto.Currency;
 import ru.mdemidkin.libdto.UserDto;
 
@@ -62,6 +63,62 @@ public class AccountsController {
                 });
     }
 
+    @PostMapping("/signup/render")
+    public Mono<ResponseEntity<String>> registerNewUser(@ModelAttribute @ValidSignup SignupRequest signupRequest,
+                                                        ServerWebExchange exchange) {
+        return userService.registerNewUser(signupRequest)
+                .then(getMainAccountsPage(exchange));
+    }
+
+    @PostMapping("/user/{login}/editPassword")
+    public Mono<ResponseEntity<String>> editPassword(@PathVariable String login,
+                                                     @ModelAttribute EditPasswordRequest editPasswordRequest,
+                                                     ServerWebExchange exchange) {
+        List<String> errors = ValidationUtils.validatePasswordRequest(editPasswordRequest);
+        if (!errors.isEmpty()) {
+            return addErrorsToSession(exchange, "passwordErrors", errors);
+        }
+        return userService.editPassword(login, editPasswordRequest)
+                .then(getMainAccountsPage(exchange));
+    }
+
+    @PostMapping("/user/{login}/editUserAccounts")
+    public Mono<ResponseEntity<String>> editAccounts(@PathVariable String login,
+                                                     @ModelAttribute EditAccountsRequest editAccountsRequest,
+                                                     ServerWebExchange exchange) {
+        List<String> errors = ValidationUtils.validateEditUserAccountsRequest(editAccountsRequest);
+        if (!errors.isEmpty()) {
+            return addErrorsToSession(exchange, "userAccountsErrors", errors);
+        }
+        List<String> accounts = editAccountsRequest.getAccount() != null ? editAccountsRequest.getAccount() : List.of();
+        return userService.updateUserInfo(login, editAccountsRequest)
+                .then(accountService.updateAccounts(login, accounts))
+                .then(getMainAccountsPage(exchange));
+    }
+
+    @PostMapping("/api/{login}/cash")
+    public Mono<ResponseEntity<String>> editCash(@PathVariable String login,
+                                                 @RequestBody CashRequest cashRequest,
+                                                 ServerWebExchange exchange) {
+
+        // todo доставать тут аккаунт сравнить и выводить ошибки
+        List<String> errors = ValidationUtils.validateEditCashRequest(cashRequest);
+        if (!errors.isEmpty()) {
+            return addErrorsToSession(exchange, "cashErrors", errors);
+        }
+        return accountService.updateCashBalance(login, cashRequest)
+                .then(getMainAccountsPage(exchange));
+    }
+
+    private Mono<List<UserDto>> getUsers() {
+        return userService.findAllUsers()
+                .map(user -> UserDto.builder()
+                        .login(user.getLogin())
+                        .name(user.getName())
+                        .build())
+                .collectList();
+    }
+
     private Mono<List<AccountDto>> getAccountsWithAllCurrencies(String username) {
         return accountService.getUserAccounts(username)
                 .collectList()
@@ -94,49 +151,6 @@ public class AccountsController {
 
                     return allCurrencyAccounts;
                 });
-    }
-
-    @NotNull
-    private Mono<List<UserDto>> getUsers() {
-        return userService.findAllUsers()
-                .map(user -> UserDto.builder()
-                        .login(user.getLogin())
-                        .name(user.getName())
-                        .build())
-                .collectList();
-    }
-
-    @PostMapping("/signup/render")
-    public Mono<ResponseEntity<String>> registerNewUser(@ModelAttribute @ValidSignup SignupRequest signupRequest,
-                                                        ServerWebExchange exchange) {
-        return userService.registerNewUser(signupRequest)
-                .then(getMainAccountsPage(exchange));
-    }
-
-    @PostMapping("/user/{login}/editPassword")
-    public Mono<ResponseEntity<String>> editPassword(@PathVariable String login,
-                                                     @ModelAttribute EditPasswordRequest editPasswordRequest,
-                                                     ServerWebExchange exchange) {
-        List<String> errors = ValidationUtils.validatePasswordRequest(editPasswordRequest);
-        if (!errors.isEmpty()) {
-            return addErrorsToSession(exchange, "passwordErrors", errors);
-        }
-        return userService.editPassword(login, editPasswordRequest)
-                .then(getMainAccountsPage(exchange));
-    }
-
-    @PostMapping("/user/{login}/editUserAccounts")
-    public Mono<ResponseEntity<String>> editAccounts(@PathVariable String login,
-                                                     @ModelAttribute EditAccountsRequest editAccountsRequest,
-                                                     ServerWebExchange exchange) {
-        List<String> errors = ValidationUtils.validateEditUserAccountsRequest(editAccountsRequest);
-        if (!errors.isEmpty()) {
-            return addErrorsToSession(exchange, "userAccountsErrors", errors);
-        }
-        List<String> accounts = editAccountsRequest.getAccount() != null ? editAccountsRequest.getAccount() : List.of();
-        return userService.updateUserInfo(login, editAccountsRequest)
-                .then(accountService.updateAccounts(login, accounts))
-                .then(getMainAccountsPage(exchange));
     }
 
     private Mono<ResponseEntity<String>> addErrorsToSession(ServerWebExchange exchange,

@@ -22,6 +22,10 @@ services:
     host: ${host}
     port: 8085
     url: ${base-url}:${services.service-exchange.port}
+  service-cash:
+    host: ${host}
+    port: 8086
+    url: ${base-url}:${services.service-cash.port}
 
 management:
   endpoints:

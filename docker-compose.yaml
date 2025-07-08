@@ -1,5 +1,7 @@
 version: '3'
 services:
+
+  # -------- Infrastructure -------- #
   config-server-app:
     image: config-server-app:latest
     build:
@@ -14,6 +16,33 @@ services:
     networks:
       - app_network
 
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    tmpfs: "/datalog"
+    ports:
+      - "22181:2181"
+    networks:
+      - app_network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.1.3
+    environment:
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 8080
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8180:8080"
+    volumes:
+      - ./realm-export.json:/opt/keycloak/data/import/realm-export.json
+    command: start-dev --import-realm
+    networks:
+      - app_network
+
+  # -------- Services -------- #
   service-front-app:
     image: service-front-app:latest
     build:
@@ -81,6 +110,34 @@ services:
     networks:
       - app_network
 
+  service-cash-app:
+    image: service-cash-app:latest
+    build:
+      context: .
+      dockerfile: service-cash/Dockerfile
+    environment:
+      CONFIG_SERVER_URL: http://config-server-app:8888
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_AUTHORIZATION_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/auth
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKEN_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/token
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_CLIENT_ID: bankapp-client
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_CLIENT_SECRET: VmGXQDXNGOZzJH5Mx7Fi4OyHtnb3IH8A
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_PROVIDER: keycloak
+      SPRING_R2DBC_URL: r2dbc:postgresql://notifications-postgres:5432/notifications-db
+      SPRING_R2DBC_USERNAME: postgres
+      SPRING_R2DBC_PASSWORD: postgres
+    ports:
+      - "8086:8086"
+    #    depends_on:
+    #      - zookeeper
+    #      - config-server-app
+    restart: on-failure
+    networks:
+      - app_network
+
+
   service-gateway-app:
     image: service-gateway-app:latest
     build:
@@ -107,6 +164,7 @@ services:
     networks:
       - app_network
 
+  # -------- Databases -------- #
   accounts-postgres:
     image: postgres:16.1-alpine
     environment:
@@ -129,29 +187,14 @@ services:
     networks:
       - app_network
 
-  zookeeper:
-    image: confluentinc/cp-zookeeper:latest
+  notifications-postgres:
+    image: postgres:16.1-alpine
     environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    tmpfs: "/datalog"
+      POSTGRES_DB: notifications-db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
-      - "22181:2181"
-    networks:
-      - app_network
-
-  keycloak:
-    image: quay.io/keycloak/keycloak:26.1.3
-    environment:
-      KC_HOSTNAME: localhost
-      KC_HOSTNAME_PORT: 8080
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
-    ports:
-      - "8180:8080"
-    volumes:
-      - ./realm-export.json:/opt/keycloak/data/import/realm-export.json
-    command: start-dev --import-realm
+      - "5434:5432"
     networks:
       - app_network
 
