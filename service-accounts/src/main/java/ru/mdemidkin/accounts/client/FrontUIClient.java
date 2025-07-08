@@ -1,13 +1,9 @@
 package ru.mdemidkin.accounts.client;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -18,7 +14,6 @@ import ru.mdemidkin.libdto.Currency;
 import ru.mdemidkin.libdto.MainPageRequest;
 import ru.mdemidkin.libdto.UserDto;
 
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -57,6 +52,12 @@ public class FrontUIClient {
                 session.getAttribute("transferErrors"),
                 session.getAttribute("transferOtherErrors")
         );
+
+        session.getAttributes().remove("passwordErrors");
+        session.getAttributes().remove("userAccountsErrors");
+        session.getAttributes().remove("cashErrors");
+        session.getAttributes().remove("transferErrors");
+        session.getAttributes().remove("transferOtherErrors");
 
         return webClient.post()
                 .uri(FRONT_UI_BASE_URL + "/main")

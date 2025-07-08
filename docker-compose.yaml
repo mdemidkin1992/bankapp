@@ -25,9 +25,9 @@ services:
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
     ports:
       - "8083:8083"
-    depends_on:
-      - zookeeper
-      - config-server-app
+#    depends_on:
+#      - zookeeper
+#      - config-server-app
     restart: on-failure
     networks:
       - app_network
@@ -73,10 +73,10 @@ services:
       SPRING_R2DBC_PASSWORD: postgres
     ports:
       - "8085:8085"
-    depends_on:
-      - zookeeper
-      - config-server-app
-      - exchange-postgres
+#    depends_on:
+#      - zookeeper
+#      - config-server-app
+#      - exchange-postgres
     restart: on-failure
     networks:
       - app_network

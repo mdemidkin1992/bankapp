@@ -38,7 +38,7 @@ spring:
             - id: edit-password-route
               uri: lb://service-accounts
               predicates:
-                - Path=**/editPassword
+                - Path=/user/{login}/editPassword
               filters:
                 - TokenRelay=bankapp-client
 

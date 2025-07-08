@@ -33,7 +33,7 @@ public class SignupValidator implements ConstraintValidator<ValidSignup, SignupR
         if (value.getPassword() != null && !value.getPassword().equals(value.getConfirmPassword())) {
             errors.add("Пароли должны совпадать");
         }
-        if (value.getBirthdate() != null && LocalDate.now().isAfter(value.getBirthdate().plusYears(18L))) {
+        if (value.getBirthdate() != null && LocalDate.now().isBefore(value.getBirthdate().plusYears(18L))) {
             errors.add("Возраст должен быть старше 18 лет");
         }
 

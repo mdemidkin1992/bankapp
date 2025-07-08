@@ -40,7 +40,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("javax.annotation:javax.annotation-api:1.3.2")
     implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
-//    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 
     implementation(project(":lib-dto"))
 

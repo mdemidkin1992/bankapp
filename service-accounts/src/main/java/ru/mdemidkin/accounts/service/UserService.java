@@ -1,9 +1,7 @@
 package ru.mdemidkin.accounts.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.lang.NonNull;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -18,16 +16,15 @@ import ru.mdemidkin.libdto.UserDto;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public Mono<User> registerNewUser(SignupRequest signupRequest) {
         User createUser = User.builder()
                 .name(signupRequest.getName())
                 .login(signupRequest.getLogin())
-                .password(signupRequest.getPassword())
+                .password(passwordEncoder.encode(signupRequest.getPassword()))
                 .birthdate(signupRequest.getBirthdate())
                 .build();
-
-        hashPassword(createUser);
         return userRepository.save(createUser);
     }
 
@@ -35,7 +32,7 @@ public class UserService {
         return userRepository.findByLogin(login)
                 .switchIfEmpty(Mono.error(new UsernameNotFoundException("Пользователь не найден: " + login)))
                 .flatMap(user -> {
-                    hashPassword(user);
+                    user.setPassword(passwordEncoder.encode(editPasswordRequest.getPassword()));
                     return userRepository.save(user);
                 });
     }
@@ -56,10 +53,4 @@ public class UserService {
                 .build();
 
     }
-
-    private void hashPassword(@NonNull User user) {
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-    }
-
 }
