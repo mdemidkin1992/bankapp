@@ -125,9 +125,6 @@ services:
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_CLIENT_ID: bankapp-client
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_CLIENT_SECRET: VmGXQDXNGOZzJH5Mx7Fi4OyHtnb3IH8A
       SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_PROVIDER: keycloak
-      SPRING_R2DBC_URL: r2dbc:postgresql://notifications-postgres:5432/notifications-db
-      SPRING_R2DBC_USERNAME: postgres
-      SPRING_R2DBC_PASSWORD: postgres
     ports:
       - "8086:8086"
     #    depends_on:
@@ -137,6 +134,27 @@ services:
     networks:
       - app_network
 
+  service-notifications-app:
+    image: service-notifications-app:latest
+    build:
+      context: .
+      dockerfile: service-notifications/Dockerfile
+    environment:
+      CONFIG_SERVER_URL: http://config-server-app:8888
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
+      SPRING_R2DBC_URL: r2dbc:postgresql://notifications-postgres:5432/notifications-db
+      SPRING_R2DBC_USERNAME: postgres
+      SPRING_R2DBC_PASSWORD: postgres
+    ports:
+      - "8087:8087"
+    #    depends_on:
+    #      - zookeeper
+    #      - config-server-app
+    #      - notifications-postgres
+    restart: on-failure
+    networks:
+      - app_network
 
   service-gateway-app:
     image: service-gateway-app:latest

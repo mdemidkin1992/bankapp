@@ -26,6 +26,10 @@ services:
     host: ${host}
     port: 8086
     url: ${base-url}:${services.service-cash.port}
+  service-notifications:
+    host: ${host}
+    port: 8087
+    url: ${base-url}:${services.service-notifications.port}
 
 management:
   endpoints:

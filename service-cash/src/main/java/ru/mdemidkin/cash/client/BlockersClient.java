@@ -2,28 +2,24 @@ package ru.mdemidkin.cash.client;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import ru.mdemidkin.cash.dto.CashRequest;
-import ru.mdemidkin.libdto.CashProcessResponse;
 
 import java.nio.charset.StandardCharsets;
 
 @Service
 @RequiredArgsConstructor
-public class AccountsClient {
+public class BlockersClient {
     private final WebClient webClient;
-    private static final String ACCOUNTS_BASE_URL = "http://service-accounts";
+    private static final String BLOCKER_BASE_URL = "http://service-cash"; // todo поменять на service-blocker
 
-    public Mono<ResponseEntity<CashProcessResponse>> sendCashUpdateRequest(String login, CashRequest cashRequest) {
+    public Mono<Boolean> sendBlockerRequest(String time) {
         return webClient.post()
-                .uri(ACCOUNTS_BASE_URL + "/api/{login}/cash", login)
+                .uri(BLOCKER_BASE_URL + "/api/{time}/block", time)
                 .contentType(MediaType.APPLICATION_JSON)
                 .acceptCharset(StandardCharsets.UTF_8)
-                .bodyValue(cashRequest)
                 .retrieve()
-                .toEntity(CashProcessResponse.class);
+                .bodyToMono(Boolean.class);
     }
 }

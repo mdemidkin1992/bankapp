@@ -1,4 +1,4 @@
-package ru.mdemidkin.cash.model;
+package ru.mdemidkin.exchange.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table("notifications")
-// todo перенести в service-notification
 public class Notification {
     @Id
     private Long id;

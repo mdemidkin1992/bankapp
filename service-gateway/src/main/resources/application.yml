@@ -70,6 +70,13 @@ spring:
               filters:
                 - TokenRelay=bankapp-client
 
+            - id: notifications-route
+              uri: lb://service-notifications
+              predicates:
+                - Path=/api/{login}/notifications
+              filters:
+                - TokenRelay=bankapp-client
+
   # Security
   security:
     oauth2:

@@ -72,6 +72,12 @@ public class AccountService {
                 .flatMapMany(user -> accountRepository.findByUserId(user.getId()));
     }
 
+    public Mono<Account> getAccount(String login, String currency) {
+        return userRepository.findByLogin(login)
+                .switchIfEmpty(Mono.error(new UsernameNotFoundException("Пользователь не найден: " + login)))
+                .flatMap(user -> accountRepository.findByUserIdAndCurrency(user.getId(), currency));
+    }
+
     public Mono<Void> updateCashBalance(String login, CashRequest cashRequest) {
         return userRepository.findByLogin(login)
                 .switchIfEmpty(Mono.error(new UsernameNotFoundException("Пользователь не найден: " + login)))

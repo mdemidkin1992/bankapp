@@ -39,6 +39,7 @@ public class FrontUIClient {
                                                             List<UserDto> users,
                                                             List<Currency> currency
     ) {
+        boolean hasErrors = hasError(session);
         MainPageRequest request = new MainPageRequest(
                 userData.getLogin(),
                 userData.getName(),
@@ -65,6 +66,29 @@ public class FrontUIClient {
                 .acceptCharset(StandardCharsets.UTF_8)
                 .bodyValue(request)
                 .retrieve()
-                .toEntity(String.class);
+                .toEntity(String.class)
+                .map(response -> assignCode(response, hasErrors));
+    }
+
+    private boolean hasError(WebSession session) {
+        Object passwordErrors = session.getAttribute("passwordErrors");
+        Object userAccountsErrors = session.getAttribute("userAccountsErrors");
+        Object cashErrors = session.getAttribute("cashErrors");
+        Object transferErrors = session.getAttribute("transferErrors");
+        Object transferOtherErrors = session.getAttribute("transferOtherErrors");
+
+        return passwordErrors != null
+                || userAccountsErrors != null
+                || cashErrors != null
+                || transferErrors != null
+                || transferOtherErrors != null;
+    }
+
+    private ResponseEntity<String> assignCode(ResponseEntity<String> response,
+                                              boolean hasErrors) {
+        if (hasErrors) {
+            return ResponseEntity.badRequest().body(response.getBody());
+        }
+        return response;
     }
 }

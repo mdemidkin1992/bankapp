@@ -28,6 +28,7 @@ public class UserService {
                 .login(signupRequest.getLogin())
                 .password(passwordEncoder.encode(signupRequest.getPassword()))
                 .birthdate(signupRequest.getBirthdate())
+                .role("USER")
                 .build();
         return userRepository.save(createUser);
     }

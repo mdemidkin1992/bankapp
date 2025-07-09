@@ -4,8 +4,11 @@ import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import ru.mdemidkin.accounts.dto.EditAccountsRequest;
 import ru.mdemidkin.accounts.dto.EditPasswordRequest;
+import ru.mdemidkin.accounts.model.Account;
+import ru.mdemidkin.libdto.CashAction;
 import ru.mdemidkin.libdto.CashRequest;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,17 +47,23 @@ public final class ValidationUtils {
         return errors;
     }
 
-    public static List<String> validateEditCashRequest(@NonNull CashRequest cashRequest) {
+    public static List<String> validateEditCashRequest(Account account, @NonNull CashRequest cashRequest) {
         List<String> errors = new ArrayList<>();
-
-        if (cashRequest.getCurrency() == null || cashRequest.getCurrency().isBlank()) {
-            errors.add("Валюта не должна быть пустой");
+        if (account == null) {
+            errors.add("Нет счета в валюте " + cashRequest.getCurrency());
+            return errors;
         }
-        if (cashRequest.getValue() == null) {
+        BigDecimal subtract = new BigDecimal(cashRequest.getValue());
+        if (subtract.compareTo(BigDecimal.ZERO) < 0) {
             errors.add("Введите значение больше 0");
+            return errors;
         }
-        if (cashRequest.getAction() == null) {
-            errors.add("Действие не должно быть пустым");
+        if (cashRequest.getAction() == CashAction.GET) {
+            if (account.getBalance().subtract(subtract).compareTo(BigDecimal.ZERO) < 0) {
+                errors.add("Не достаточно средств для снятия "
+                        + cashRequest.getCurrency() + " "
+                        + cashRequest.getValue());
+            }
         }
         return errors;
     }

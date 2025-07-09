@@ -1,6 +1,7 @@
 package ru.mdemidkin.accounts.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 import ru.mdemidkin.accounts.client.FrontUIClient;
@@ -22,11 +24,13 @@ import ru.mdemidkin.accounts.service.UserService;
 import ru.mdemidkin.accounts.validation.ValidSignup;
 import ru.mdemidkin.accounts.validation.ValidationUtils;
 import ru.mdemidkin.libdto.AccountDto;
+import ru.mdemidkin.libdto.CashProcessResponse;
 import ru.mdemidkin.libdto.CashRequest;
 import ru.mdemidkin.libdto.Currency;
 import ru.mdemidkin.libdto.UserDto;
 
 import java.math.BigDecimal;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,14 +48,22 @@ public class AccountsController {
     private final FrontUIClient client;
 
     @GetMapping("/")
-    public Mono<ResponseEntity<String>> redirectToMain(ServerWebExchange exchange) {
-        return getMainAccountsPage(exchange);
+    public Mono<ResponseEntity<Void>> redirectToMain(ServerWebExchange exchange,
+                                                     @RequestParam(required = false) String cashErrors) {
+        if (cashErrors != null) {
+            exchange.getSession()
+                    .doOnNext(session -> session.getAttributes().put("cashErrors", cashErrors))
+                    .subscribe(); // todo dev
+        }
+        return Mono.just(ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create("/main"))
+                .build());
     }
 
     @GetMapping("/main")
     public Mono<ResponseEntity<String>> getMainAccountsPage(ServerWebExchange exchange) {
-        Mono<UserDto> currentUserMono = userService.findByUsername("user1");
-        Mono<List<AccountDto>> accountsMono = getAccountsWithAllCurrencies("user1");
+        Mono<UserDto> currentUserMono = userService.findByUsername("user1"); // todo исправить
+        Mono<List<AccountDto>> accountsMono = getAccountsWithAllCurrencies("user1"); // todo исправить
         Mono<List<UserDto>> usersMono = getUsers();
         List<Currency> currencies = List.of(Currency.values());
         return Mono.zip(currentUserMono, accountsMono, usersMono)
@@ -64,10 +76,11 @@ public class AccountsController {
     }
 
     @PostMapping("/signup/render")
-    public Mono<ResponseEntity<String>> registerNewUser(@ModelAttribute @ValidSignup SignupRequest signupRequest,
-                                                        ServerWebExchange exchange) {
+    public Mono<ResponseEntity<Void>> registerNewUser(@ModelAttribute @ValidSignup SignupRequest signupRequest) {
         return userService.registerNewUser(signupRequest)
-                .then(getMainAccountsPage(exchange));
+                .then(Mono.just(ResponseEntity.status(HttpStatus.FOUND)
+                        .location(URI.create("/main"))
+                        .build()));
     }
 
     @PostMapping("/user/{login}/editPassword")
@@ -79,7 +92,9 @@ public class AccountsController {
             return addErrorsToSession(exchange, "passwordErrors", errors);
         }
         return userService.editPassword(login, editPasswordRequest)
-                .then(getMainAccountsPage(exchange));
+                .then(Mono.just(ResponseEntity.status(HttpStatus.FOUND)
+                        .location(URI.create("/main"))
+                        .build()));
     }
 
     @PostMapping("/user/{login}/editUserAccounts")
@@ -93,21 +108,39 @@ public class AccountsController {
         List<String> accounts = editAccountsRequest.getAccount() != null ? editAccountsRequest.getAccount() : List.of();
         return userService.updateUserInfo(login, editAccountsRequest)
                 .then(accountService.updateAccounts(login, accounts))
-                .then(getMainAccountsPage(exchange));
+                .then(Mono.just(ResponseEntity.status(HttpStatus.FOUND)
+                        .location(URI.create("/main"))
+                        .build()));
     }
 
     @PostMapping("/api/{login}/cash")
-    public Mono<ResponseEntity<String>> editCash(@PathVariable String login,
+    public Mono<ResponseEntity<CashProcessResponse>> editCash(@PathVariable String login,
                                                  @RequestBody CashRequest cashRequest,
                                                  ServerWebExchange exchange) {
-
-        // todo доставать тут аккаунт сравнить и выводить ошибки
-        List<String> errors = ValidationUtils.validateEditCashRequest(cashRequest);
-        if (!errors.isEmpty()) {
-            return addErrorsToSession(exchange, "cashErrors", errors);
-        }
-        return accountService.updateCashBalance(login, cashRequest)
-                .then(getMainAccountsPage(exchange));
+        return accountService.getAccount(login, cashRequest.getCurrency())
+                .flatMap(account -> {
+                    List<String> errors = ValidationUtils.validateEditCashRequest(account, cashRequest);
+                    if (!errors.isEmpty()) {
+                        return Mono.just(ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(CashProcessResponse.builder()
+                                        .status("error")
+                                        .errors(errors)
+                                        .build()));
+                    }
+                    return accountService.updateCashBalance(login, cashRequest)
+                            .then(Mono.just(ResponseEntity
+                                    .status(HttpStatus.OK)
+                                    .body(CashProcessResponse.builder()
+                                            .status("completed")
+                                            .build())));
+                })
+                .switchIfEmpty(Mono.just(ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(CashProcessResponse.builder()
+                                .status("error")
+                                .errors(List.of("Аккаунт не найден " + cashRequest.getCurrency()))
+                                .build())));
     }
 
     private Mono<List<UserDto>> getUsers() {
@@ -158,7 +191,9 @@ public class AccountsController {
                                                             List<String> errors) {
         return exchange.getSession()
                 .doOnNext(session -> session.getAttributes().put(field, errors))
-                .then(getMainAccountsPage(exchange));
+                .then(Mono.just(ResponseEntity.status(HttpStatus.FOUND)
+                        .location(URI.create("/main"))
+                        .build()));
     }
 
     private Mono<ResponseEntity<String>> getResponseEntityMono(ServerWebExchange exchange,

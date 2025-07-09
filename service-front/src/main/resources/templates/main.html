@@ -26,6 +26,26 @@
                 })
                 .catch(error => td.innerHTML = 'Ошибка при получении данных курсов валют');
         }, 1000);
+
+        setInterval(() => {
+            var notificationsDiv = document.getElementById('notifications');
+            var login = '[[${login}]]';
+
+            fetch(`http://localhost:8080/api/${login}/notifications`, {
+                credentials: 'include'
+            })
+                .then(response => response.json())
+                .then(notifications => {
+                    var content = '<table style="width:100%;margin-left:auto;margin-right:auto;border-radius:2%;padding:10px;background-color:whitesmoke;">';
+                    content += '<tr><th>Уведомления</th></tr>';
+                    notifications.forEach(notification => {
+                        content += '<tr><td style="padding:5px;">' + notification.message + '</td></tr>';
+                    });
+                    content += '</table>';
+                    notificationsDiv.innerHTML = content;
+                })
+                .catch(error => notificationsDiv.innerHTML = 'Нет последних уведомлений');
+        }, 1000);
     </script>
 </head>
 
@@ -99,7 +119,7 @@
         </form>
     </td></tr>
     <tr><td style="padding:2px;">
-        <form method="post" th:action="${'/user/'+login+'/сash'}">
+        <form method="post" th:action="${'/user/'+login+'/cash'}">
             <table style="width:100%;margin-left:auto;margin-right:auto;border-radius:2%;padding:10px;background-color:whitesmoke;">
                 <tr th:if="${cashErrors!=null}" th:each="cashError : ${cashErrors}">
                     <td style="color:red;" th:text="${cashError}"/>
@@ -192,6 +212,8 @@
         </form>
     </td></tr>
     <tr><td style="padding:2px;" id="exchange_rates">
+    </td></tr>
+    <tr><td style="padding:2px;" id="notifications">
     </td></tr>
 </table>
 </body>
