@@ -10,6 +10,10 @@ services:
     host: ${host}
     port: 8888
     url: ${base-url}:${services.config-server.port}
+  service-transfer:
+    host: ${host}
+    port: 8082
+    url: ${base-url}:${services.service-transfer.port}
   service-blocker:
     host: ${host}
     port: 8083

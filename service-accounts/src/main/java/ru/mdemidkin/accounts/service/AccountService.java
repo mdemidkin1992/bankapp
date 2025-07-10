@@ -82,7 +82,7 @@ public class AccountService {
                 .flatMap(user -> accountRepository.findByUserIdAndCurrency(user.getId(), cashRequest.getCurrency())
                         .switchIfEmpty(Mono.error(new AccountNotFoundException("Счет не найден для валюты: " + cashRequest.getCurrency())))
                         .flatMap(account -> {
-                            BigDecimal newBalance = getBigDecimal(cashRequest, account);
+                            BigDecimal newBalance = getUpdatedBalance(cashRequest, account);
                             account.setBalance(newBalance);
                             account.setUpdatedAt(LocalDateTime.now());
                             return accountRepository.save(account);
@@ -91,7 +91,7 @@ public class AccountService {
                 .then();
     }
 
-    private static BigDecimal getBigDecimal(CashRequest cashRequest, Account account) {
+    private static BigDecimal getUpdatedBalance(CashRequest cashRequest, Account account) {
         CashAction action = cashRequest.getAction();
         BigDecimal newBalance;
         if (Objects.requireNonNull(action) == CashAction.PUT) {

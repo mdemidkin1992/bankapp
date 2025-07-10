@@ -39,7 +39,9 @@ public class FrontEndController {
     public Mono<String> redirectToMain(ServerWebExchange exchange,
                                        @RequestParam(required = false) String login,
                                        @RequestParam(required = false) String passwordErrors,
-                                       @RequestParam(required = false) String cashErrors) {
+                                       @RequestParam(required = false) String cashErrors,
+                                       @RequestParam(required = false) String transferOtherErrors,
+                                       @RequestParam(required = false) String transferErrors) {
         return exchange.getSession()
                 .flatMap(session -> {
                     if (login != null) {
@@ -50,6 +52,12 @@ public class FrontEndController {
                     }
                     if (cashErrors != null) {
                         session.getAttributes().put("cashErrors", cashErrors);
+                    }
+                    if (transferOtherErrors != null) {
+                        session.getAttributes().put("transferOtherErrors", transferOtherErrors);
+                    }
+                    if (transferErrors != null) {
+                        session.getAttributes().put("transferErrors", transferErrors);
                     }
                     return Mono.just("redirect:/main");
                 });

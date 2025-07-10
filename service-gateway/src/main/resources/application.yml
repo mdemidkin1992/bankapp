@@ -56,6 +56,12 @@ spring:
               filters:
                 - TokenRelay=bankapp-client
 
+            - id: transfer-route
+              uri: lb://service-transfer
+              predicates:
+                - Path=/user/{login}/transfer
+              filters:
+                - TokenRelay=bankapp-client
 
             # API Controllers
 #

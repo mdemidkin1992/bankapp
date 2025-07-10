@@ -178,6 +178,21 @@ public class AccountsController {
                                 .build())));
     }
 
+    @GetMapping("/api/{login}/account/{currency}")
+    @ResponseBody
+    public Mono<AccountDto> getUserAccount(@PathVariable String login,
+                                           @PathVariable String currency) {
+        return accountService.getAccount(login, currency)
+                .map(account -> AccountDto.builder()
+                        .currency(Currency.valueOf(account.getCurrency()))
+                        .value(account.getBalance())
+                        .exists(true)
+                        .build())
+                .switchIfEmpty(Mono.just(AccountDto.builder()
+                        .exists(false)
+                        .build()));
+    }
+
     private Mono<ResponseEntity<Void>> redirectToMain(@NonNull String login,
                                                       @Nullable List<String> passwordErrors,
                                                       @Nullable List<String> userAccountsErrors) {
