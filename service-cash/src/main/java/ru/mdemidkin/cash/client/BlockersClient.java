@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class BlockersClient {
     private final WebClient webClient;
-    private static final String BLOCKER_BASE_URL = "http://service-cash"; // todo поменять на service-blocker
+    private static final String BLOCKER_BASE_URL = "http://service-blocker";
 
     public Mono<Boolean> sendBlockerRequest(String time) {
         return webClient.post()

@@ -1,4 +1,4 @@
-package ru.mdemidkin.cash.service;
+package ru.mdemidkin.exchange.service;
 
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -6,7 +6,6 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 
 @Service
-//todo в сервис blocker-service
 public class BlockerService {
 
     /**

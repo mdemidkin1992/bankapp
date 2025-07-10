@@ -56,6 +56,30 @@ spring:
               filters:
                 - TokenRelay=bankapp-client
 
+
+            # API Controllers
+#
+#            - id: blocker-route
+#              uri: lb://service-blocker
+#              predicates:
+#                - Path=/api/{time}/block
+#              filters:
+#                - TokenRelay=bankapp-client
+#
+#            - id: cash-balance-route
+#              uri: lb://service-accounts
+#              predicates:
+#                - Path=/api/{login}/cash
+#              filters:
+#                - TokenRelay=bankapp-client
+#
+#            - id: notifications-user-route
+#              uri: lb://service-notifications
+#              predicates:
+#                - Path=/api/{login}/notifications
+#              filters:
+#                - TokenRelay=bankapp-client
+
   # Security
   security:
     oauth2:
