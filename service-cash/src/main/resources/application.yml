@@ -22,7 +22,7 @@ spring:
         webflux:
           routes:
             - id: service-front-route
-              uri: lb://service-accounts
+              uri: lb://service-gateway
               predicates:
                 - Path=/
               filters:

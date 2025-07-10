@@ -12,7 +12,7 @@ import ru.mdemidkin.cash.client.AccountsClient;
 import ru.mdemidkin.cash.client.BlockersClient;
 import ru.mdemidkin.cash.client.NotificationsClient;
 import ru.mdemidkin.cash.dto.CashRequest;
-import ru.mdemidkin.libdto.CashProcessResponse;
+import ru.mdemidkin.libdto.cash.CashProcessResponse;
 
 import java.net.URI;
 import java.time.LocalDateTime;

@@ -11,7 +11,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.mdemidkin.exchange.model.Notification;
 import ru.mdemidkin.exchange.service.NotificationService;
-import ru.mdemidkin.libdto.NotificationDto;
+import ru.mdemidkin.libdto.notification.NotificationDto;
 
 import java.util.Comparator;
 import java.util.stream.Collectors;

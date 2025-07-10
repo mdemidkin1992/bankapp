@@ -16,6 +16,18 @@ spring:
         enabled: true
       connect-string: localhost:2181
 
+    # Gateway (service-locator)
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: service-front-route
+              uri: lb://service-gateway
+              predicates:
+                - Path=/
+              filters:
+                - TokenRelay=bankapp-client
+
   # Security
   security:
     oauth2:

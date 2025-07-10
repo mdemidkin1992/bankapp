@@ -1,20 +1,22 @@
 package ru.mdemidkin.accounts.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import ru.mdemidkin.accounts.dto.EditAccountsRequest;
-import ru.mdemidkin.accounts.dto.EditPasswordRequest;
-import ru.mdemidkin.accounts.dto.SignupRequest;
 import ru.mdemidkin.accounts.model.User;
 import ru.mdemidkin.accounts.repository.UserRepository;
-import ru.mdemidkin.libdto.UserDto;
+import ru.mdemidkin.libdto.settings.EditAccountsRequest;
+import ru.mdemidkin.libdto.settings.EditPasswordRequest;
+import ru.mdemidkin.libdto.signup.SignupRequest;
+import ru.mdemidkin.libdto.account.UserDto;
 
 import java.time.LocalDate;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -27,7 +29,7 @@ public class UserService {
                 .name(signupRequest.getName())
                 .login(signupRequest.getLogin())
                 .password(passwordEncoder.encode(signupRequest.getPassword()))
-                .birthdate(signupRequest.getBirthdate())
+                .birthdate(signupRequest.getDate())
                 .role("USER")
                 .build();
         return userRepository.save(createUser);

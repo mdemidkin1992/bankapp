@@ -2,11 +2,12 @@ package ru.mdemidkin.accounts.validation;
 
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
-import ru.mdemidkin.accounts.dto.EditAccountsRequest;
-import ru.mdemidkin.accounts.dto.EditPasswordRequest;
 import ru.mdemidkin.accounts.model.Account;
-import ru.mdemidkin.libdto.CashAction;
-import ru.mdemidkin.libdto.CashRequest;
+import ru.mdemidkin.libdto.cash.CashAction;
+import ru.mdemidkin.libdto.cash.CashRequest;
+import ru.mdemidkin.libdto.settings.EditAccountsRequest;
+import ru.mdemidkin.libdto.settings.EditPasswordRequest;
+import ru.mdemidkin.libdto.signup.SignupRequest;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -67,5 +68,35 @@ public final class ValidationUtils {
         }
         return errors;
     }
+
+    public static List<String> validateSignupRequest(SignupRequest value) {
+
+        List<String> errors = new ArrayList<>();
+
+        if (value.getName() == null || value.getName().isBlank()) {
+            errors.add("Имя пользователя не должно быть пустым");
+        }
+        if (value.getLogin() == null || value.getLogin().isBlank()) {
+            errors.add("Логин не должен быть пустым");
+        }
+        if (value.getPassword() == null || value.getPassword().isBlank()) {
+            errors.add("Пароль не должен быть пустым");
+        }
+        if (value.getConfirmPassword() == null || value.getConfirmPassword().isBlank()) {
+            errors.add("Повторный пароль не должен быть пустым");
+        }
+        if (value.getBirthdate() == null) {
+            errors.add("Дата рождения не должна быть пустой");
+        }
+        if (value.getPassword() != null && !value.getPassword().equals(value.getConfirmPassword())) {
+            errors.add("Пароли должны совпадать");
+        }
+        if (value.getBirthdate() != null && LocalDate.now().isBefore(value.getDate().plusYears(18L))) {
+            errors.add("Возраст должен быть старше 18 лет");
+        }
+
+        return errors;
+    }
+
 
 }

@@ -18,7 +18,7 @@ public class CashController {
 
     private final CashService cashService;
 
-    @PostMapping("/user/{login}/сash")
+    @PostMapping("/user/{login}/cash")
     public Mono<ResponseEntity<Void>> editCashBalance(@PathVariable String login,
                                                       @ModelAttribute CashRequest cashRequest) {
         return cashService.updateCashBalance(login, cashRequest);

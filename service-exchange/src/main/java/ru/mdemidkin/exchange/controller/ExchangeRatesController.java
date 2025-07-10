@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import ru.mdemidkin.exchange.model.Currency;
 import ru.mdemidkin.exchange.service.ExchangeRateService;
-import ru.mdemidkin.libdto.CurrencyDto;
+import ru.mdemidkin.libdto.account.CurrencyDto;
 
 @RestController
 @RequestMapping

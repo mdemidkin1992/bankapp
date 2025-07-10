@@ -1,16 +1,15 @@
-package ru.mdemidkin.cash.dto;
+package ru.mdemidkin.libdto.cash;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.mdemidkin.libdto.cash.CashAction;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CashRequest {
+public class CashOperationRequest {
     private String currency;
     private String value;
     private CashAction action;

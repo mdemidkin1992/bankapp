@@ -7,13 +7,11 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.mdemidkin.accounts.exception.AccountNotFoundException;
-import ru.mdemidkin.accounts.exception.InsufficientFundsException;
 import ru.mdemidkin.accounts.model.Account;
 import ru.mdemidkin.accounts.repository.AccountRepository;
 import ru.mdemidkin.accounts.repository.UserRepository;
-import ru.mdemidkin.libdto.CashAction;
-import ru.mdemidkin.libdto.CashOperationRequest;
-import ru.mdemidkin.libdto.CashRequest;
+import ru.mdemidkin.libdto.cash.CashAction;
+import ru.mdemidkin.libdto.cash.CashRequest;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

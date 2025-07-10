@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 import ru.mdemidkin.accounts.service.UserService;
-import ru.mdemidkin.libdto.UserDto;
+import ru.mdemidkin.libdto.account.UserDto;
 
 @RestController
 @RequestMapping("/api/users")

@@ -5,7 +5,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import ru.mdemidkin.libdto.NotificationDto;
+import ru.mdemidkin.libdto.notification.NotificationDto;
 
 import java.nio.charset.StandardCharsets;
 

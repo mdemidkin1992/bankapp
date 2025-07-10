@@ -10,10 +10,6 @@ services:
     host: ${host}
     port: 8888
     url: ${base-url}:${services.config-server.port}
-  service-front:
-    host: ${host}
-    port: 8083
-    url: ${base-url}:${services.service-front.port}
   service-accounts:
     host: ${host}
     port: 8084

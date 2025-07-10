@@ -7,7 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import ru.mdemidkin.libdto.UserDto;
+import ru.mdemidkin.libdto.account.UserDto;
 
 import java.util.List;
 
