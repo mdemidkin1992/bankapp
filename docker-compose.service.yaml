@@ -1,0 +1,186 @@
+version: '3'
+services:
+
+  # -------- Services -------- #
+  service-front-app:
+    image: service-front-app:latest
+    build:
+      context: .
+      dockerfile: service-front/Dockerfile
+    environment:
+      CONFIG_SERVER_URL: http://config-server-app:8888
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_AUTHORIZATION_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/auth
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKEN_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/token
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_CLIENT_ID: bankapp-client
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_CLIENT_SECRET: VmGXQDXNGOZzJH5Mx7Fi4OyHtnb3IH8A
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_PROVIDER: keycloak
+    ports:
+      - "8079:8079"
+    restart: on-failure
+    networks:
+      - app_network
+
+  service-convert-app:
+    image: service-convert-app:latest
+    build:
+      context: .
+      dockerfile: service-convert/Dockerfile
+    environment:
+      CONFIG_SERVER_URL: http://config-server-app:8888
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_AUTHORIZATION_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/auth
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKEN_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/token
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_CLIENT_ID: bankapp-client
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_CLIENT_SECRET: VmGXQDXNGOZzJH5Mx7Fi4OyHtnb3IH8A
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_PROVIDER: keycloak
+    ports:
+      - "8081:8081"
+    restart: on-failure
+    networks:
+      - app_network
+
+  service-transfer-app:
+    image: service-transfer-app:latest
+    build:
+      context: .
+      dockerfile: service-transfer/Dockerfile
+    environment:
+      CONFIG_SERVER_URL: http://config-server-app:8888
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_AUTHORIZATION_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/auth
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKEN_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/token
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_CLIENT_ID: bankapp-client
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_CLIENT_SECRET: VmGXQDXNGOZzJH5Mx7Fi4OyHtnb3IH8A
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_PROVIDER: keycloak
+    ports:
+      - "8082:8082"
+    restart: on-failure
+    networks:
+      - app_network
+
+  service-blocker-app:
+    image: service-blocker-app:latest
+    build:
+      context: .
+      dockerfile: service-blocker/Dockerfile
+    environment:
+      CONFIG_SERVER_URL: http://config-server-app:8888
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
+    ports:
+      - "8083:8083"
+    restart: on-failure
+    networks:
+      - app_network
+
+  service-accounts-app:
+    image: service-accounts-app:latest
+    build:
+      context: .
+      dockerfile: service-accounts/Dockerfile
+    environment:
+      CONFIG_SERVER_URL: http://config-server-app:8888
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_AUTHORIZATION_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/auth
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKEN_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/token
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_CLIENT_ID: bankapp-client
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_CLIENT_SECRET: VmGXQDXNGOZzJH5Mx7Fi4OyHtnb3IH8A
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_PROVIDER: keycloak
+      SPRING_R2DBC_URL: r2dbc:postgresql://accounts-postgres:5432/accounts-db
+      SPRING_R2DBC_USERNAME: postgres
+      SPRING_R2DBC_PASSWORD: postgres
+    ports:
+      - "8084:8084"
+    restart: on-failure
+    networks:
+      - app_network
+
+  service-exchange-app:
+    image: service-exchange-app:latest
+    build:
+      context: .
+      dockerfile: service-exchange/Dockerfile
+    environment:
+      CONFIG_SERVER_URL: http://config-server-app:8888
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
+      SPRING_R2DBC_URL: r2dbc:postgresql://exchange-postgres:5432/exchange-db
+      SPRING_R2DBC_USERNAME: postgres
+      SPRING_R2DBC_PASSWORD: postgres
+    ports:
+      - "8085:8085"
+    restart: on-failure
+    networks:
+      - app_network
+
+  service-cash-app:
+    image: service-cash-app:latest
+    build:
+      context: .
+      dockerfile: service-cash/Dockerfile
+    environment:
+      CONFIG_SERVER_URL: http://config-server-app:8888
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_AUTHORIZATION_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/auth
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKEN_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/token
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_CLIENT_ID: bankapp-client
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_CLIENT_SECRET: VmGXQDXNGOZzJH5Mx7Fi4OyHtnb3IH8A
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_PROVIDER: keycloak
+    ports:
+      - "8086:8086"
+    restart: on-failure
+    networks:
+      - app_network
+
+  service-notifications-app:
+    image: service-notifications-app:latest
+    build:
+      context: .
+      dockerfile: service-notifications/Dockerfile
+    environment:
+      CONFIG_SERVER_URL: http://config-server-app:8888
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
+      SPRING_R2DBC_URL: r2dbc:postgresql://notifications-postgres:5432/notifications-db
+      SPRING_R2DBC_USERNAME: postgres
+      SPRING_R2DBC_PASSWORD: postgres
+    ports:
+      - "8087:8087"
+    restart: on-failure
+    networks:
+      - app_network
+
+  service-gateway-app:
+    image: service-gateway-app:latest
+    build:
+      context: .
+      dockerfile: service-gateway/Dockerfile
+    environment:
+      CONFIG_SERVER_URL: http://config-server-app:8888
+      SPRING_CLOUD_ZOOKEEPER_CONNECT_STRING: zookeeper:2181
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_AUTHORIZATION_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/auth
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKEN_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/token
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_CLIENT_ID: bankapp-client
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_CLIENT_SECRET: VmGXQDXNGOZzJH5Mx7Fi4OyHtnb3IH8A
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_BANKAPP_CLIENT_PROVIDER: keycloak
+    ports:
+      - "8080:8080"
+    restart: on-failure
+    networks:
+      - app_network
+
+networks:
+  app_network:

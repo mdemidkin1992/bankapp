@@ -26,19 +26,15 @@ dependencyManagement {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-webflux")
-    implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.cloud:spring-cloud-starter-config")
     implementation("org.springframework.cloud:spring-cloud-gateway-server-webflux")
     implementation("org.springframework.cloud:spring-cloud-starter-zookeeper-discovery")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-security")
-
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
-    implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("javax.annotation:javax.annotation-api:1.3.2")
     implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
 
-    implementation(project(":lib-dto"))
+    implementation(project(":common-dto"))
 
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")

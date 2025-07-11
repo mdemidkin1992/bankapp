@@ -1,10 +1,10 @@
-package ru.mdemidkin.servicea;
+package ru.mdemidkin.exchange;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class BlockerServiceApplicationTests {
+class ExchangeServiceApplicationTests {
 
     @Test
     void contextLoads() {

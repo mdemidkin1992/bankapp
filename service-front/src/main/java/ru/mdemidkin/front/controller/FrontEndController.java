@@ -1,39 +1,33 @@
-package ru.mdemidkin.gateway.controller;
+package ru.mdemidkin.front.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.ReactiveAuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextImpl;
-import org.springframework.security.web.server.context.ServerSecurityContextRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import reactor.core.publisher.Mono;
-import ru.mdemidkin.gateway.client.AccountsClient;
+import ru.mdemidkin.front.client.AccountsClient;
 import ru.mdemidkin.libdto.account.AccountDto;
 import ru.mdemidkin.libdto.account.Currency;
 import ru.mdemidkin.libdto.account.UserDto;
-import ru.mdemidkin.libdto.signup.SignupRequest;
 
-import java.security.Principal;
 import java.util.List;
 
+@Slf4j
 @Controller
 @RequestMapping
 @RequiredArgsConstructor
 public class FrontEndController {
 
     private final AccountsClient accountsClient;
-    private final ReactiveAuthenticationManager authenticationManager;
-    private final ServerSecurityContextRepository securityContextRepository;
+
+    @Value("${headers.user-header}")
+    private String userHeader;
 
     @GetMapping("/")
     public Mono<String> redirectToMain(ServerWebExchange exchange,
@@ -65,10 +59,12 @@ public class FrontEndController {
 
     @GetMapping("/main")
     public Mono<String> getMainPage(ServerWebExchange exchange,
-                                    Principal principal,
                                     Model model) {
         String loginAttribute = exchange.getAttribute("login");
-        String identifiedLogin = identifyUsername(loginAttribute, principal);
+        String identifiedLogin = identifyUsername(loginAttribute, exchange);
+
+        log.info("exchange.getAttribute {}, identifiedLogin {}, header {}", loginAttribute, identifiedLogin,
+                exchange.getRequest().getHeaders().getFirst("X-User-Login"));
 
         Mono<UserDto> currentUserMono = accountsClient.getUserDto(identifiedLogin);
         Mono<List<AccountDto>> accountsMono = accountsClient.getAccountsList(identifiedLogin);
@@ -87,40 +83,6 @@ public class FrontEndController {
                                 assignModelAttributes(model, session, currentUser, accounts, users, currencies);
                                 clearSessions(session);
                                 return "main";
-                            });
-                });
-    }
-
-    @GetMapping("/signup")
-    public Mono<String> getSignupHtml() {
-        return Mono.just("signup");
-    }
-
-    @PostMapping("/signup")
-    public Mono<String> registerNewUser(@ModelAttribute SignupRequest signupRequest,
-                                        ServerWebExchange exchange,
-                                        Model model) {
-        return accountsClient.signup(signupRequest)
-                .flatMap(response -> {
-                    if (response.getErrors() != null) {
-                        model.addAttribute("name", response.getName());
-                        model.addAttribute("login", response.getLogin());
-                        model.addAttribute("password", response.getPassword());
-                        model.addAttribute("birthdate", response.getBirthdate());
-                        model.addAttribute("errors", response.getErrors());
-                        return Mono.just("signup");
-                    }
-
-                    Authentication auth = new UsernamePasswordAuthenticationToken(
-                            response.getLogin(),
-                            response.getPassword()
-                    );
-
-                    return authenticationManager.authenticate(auth)
-                            .flatMap(authenticated -> {
-                                SecurityContext context = new SecurityContextImpl(authenticated);
-                                return securityContextRepository.save(exchange, context)
-                                        .thenReturn("redirect:/");
                             });
                 });
     }
@@ -157,11 +119,12 @@ public class FrontEndController {
      * При редиректе из других сервисов определяет по параметру "login" в Session.
      */
     private String identifyUsername(String loginAttribute,
-                                    Principal principal) {
+                                    ServerWebExchange exchange) {
         if (loginAttribute != null && !loginAttribute.isBlank()) {
             return loginAttribute;
         }
-        return principal.getName();
+
+        return exchange.getRequest().getHeaders().getFirst(userHeader);
     }
 
 }

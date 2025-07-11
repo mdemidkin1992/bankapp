@@ -1,10 +1,10 @@
-package ru.mdemidkin.servicea;
+package ru.mdemidkin.accounts;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class CashServiceApplicationTests {
+class AccountsServiceApplicationTests {
 
     @Test
     void contextLoads() {

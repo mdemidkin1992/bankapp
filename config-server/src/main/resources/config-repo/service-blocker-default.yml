@@ -1,2 +1,21 @@
 server:
   port: ${services.service-blocker.port}
+
+spring:
+  main:
+    allow-bean-definition-overriding: true # убрать после dev
+
+  # Cloud
+  cloud:
+    # Zookeeper
+    zookeeper:
+      discovery:
+        enabled: true
+      connect-string: localhost:2181
+
+  # Security
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8180/realms/bankapp/protocol/openid-connect/certs

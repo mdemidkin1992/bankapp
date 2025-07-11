@@ -10,7 +10,7 @@ import ru.mdemidkin.accounts.service.UserService;
 import ru.mdemidkin.libdto.account.UserDto;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/auth/users")
 @RequiredArgsConstructor
 public class UserAuthController {
 

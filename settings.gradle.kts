@@ -10,4 +10,5 @@ include(
     "service-blocker",
     "service-transfer",
     "service-convert",
-    "lib-dto")
+    "service-front",
+    "common-dto")

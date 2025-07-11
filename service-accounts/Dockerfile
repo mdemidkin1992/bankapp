@@ -1,11 +1,4 @@
-# === Сборка jar ===
-FROM gradle:8.5-jdk21 AS build
-WORKDIR /app
-COPY . .
-RUN gradle :service-accounts:build --no-daemon -x test
-
-# === Сборка docker образа ===
 FROM amazoncorretto:21-alpine
 WORKDIR /app
-COPY --from=build /app/service-accounts/build/libs/*.jar app.jar
+COPY service-accounts/build/libs/*.jar app.jar
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

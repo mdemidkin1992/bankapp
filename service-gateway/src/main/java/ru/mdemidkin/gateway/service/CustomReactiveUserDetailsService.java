@@ -22,7 +22,7 @@ public class CustomReactiveUserDetailsService implements ReactiveUserDetailsServ
     public Mono<UserDetails> findByUsername(String username) {
         return accountsClient
                 .get()
-                .uri(ACCOUNTS_BASE_URL + "/api/users/{username}", username)
+                .uri(ACCOUNTS_BASE_URL + "/auth/users/{username}", username)
                 .retrieve()
                 .bodyToMono(UserDto.class)
                 .map(this::mapToUserDetails);

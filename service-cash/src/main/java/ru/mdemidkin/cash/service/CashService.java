@@ -11,8 +11,8 @@ import reactor.core.publisher.Mono;
 import ru.mdemidkin.cash.client.AccountsClient;
 import ru.mdemidkin.cash.client.BlockersClient;
 import ru.mdemidkin.cash.client.NotificationsClient;
-import ru.mdemidkin.cash.dto.CashRequest;
 import ru.mdemidkin.libdto.cash.CashProcessResponse;
+import ru.mdemidkin.libdto.cash.CashRequest;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -44,7 +44,6 @@ public class CashService {
                                     CashProcessResponse body = response.getBody();
                                     log.info("тело ответа {}", body);
                                     if (body != null && "completed".equals(body.getStatus())) {
-//                                    if (response.getStatusCode().is2xxSuccessful()) {
                                         notificationsClient.sendNotification(login, formatMessage(SUCCESS_MESSAGE, cashRequest)).subscribe();
                                     } else {
                                         notificationsClient.sendNotification(login, formatMessage(FAIL_MESSAGE, cashRequest)).subscribe();

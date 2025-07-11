@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import reactor.core.publisher.Mono;
-import ru.mdemidkin.cash.dto.CashRequest;
 import ru.mdemidkin.cash.service.CashService;
+import ru.mdemidkin.libdto.cash.CashRequest;
 
 @Controller
 @RequestMapping

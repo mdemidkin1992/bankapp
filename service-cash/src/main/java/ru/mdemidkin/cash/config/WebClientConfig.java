@@ -27,6 +27,7 @@ public class WebClientConfig {
                 new ServerOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
 
         oauth2Client.setDefaultClientRegistrationId(KEYCLOAK_CLIENT);
+        oauth2Client.setDefaultOAuth2AuthorizedClient(true);
 
         return webClientBuilder
                 .filter(oauth2Client)

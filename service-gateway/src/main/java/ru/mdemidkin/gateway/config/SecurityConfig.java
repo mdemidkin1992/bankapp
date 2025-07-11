@@ -41,6 +41,9 @@ public class SecurityConfig {
                 .logout(withDefaults())
                 .oauth2Client(Customizer.withDefaults())
                 .authenticationManager(reactiveAuthenticationManager())
+                .oauth2ResourceServer(oauth2 ->
+                        oauth2.jwt(Customizer.withDefaults())
+                )
                 .build();
     }
 
@@ -64,7 +67,7 @@ public class SecurityConfig {
         resolver.setCookieName("JSESSIONID");
         resolver.addCookieInitializer(builder -> builder
                 .httpOnly(true)
-                .secure(false) // true для production с HTTPS
+                .secure(false)
                 .sameSite("Lax")
                 .path("/")
         );
