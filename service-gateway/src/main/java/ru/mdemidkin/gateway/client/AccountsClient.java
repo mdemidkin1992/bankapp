@@ -8,9 +8,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import ru.mdemidkin.libdto.account.AccountDto;
 import ru.mdemidkin.libdto.account.Currency;
+import ru.mdemidkin.libdto.account.UserDto;
 import ru.mdemidkin.libdto.signup.SignupRequest;
 import ru.mdemidkin.libdto.signup.SignupResponse;
-import ru.mdemidkin.libdto.account.UserDto;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;

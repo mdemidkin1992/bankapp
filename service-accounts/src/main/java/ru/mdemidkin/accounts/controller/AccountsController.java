@@ -20,14 +20,14 @@ import ru.mdemidkin.accounts.service.AccountService;
 import ru.mdemidkin.accounts.service.UserService;
 import ru.mdemidkin.accounts.validation.ValidationUtils;
 import ru.mdemidkin.libdto.account.AccountDto;
+import ru.mdemidkin.libdto.account.Currency;
+import ru.mdemidkin.libdto.account.UserDto;
 import ru.mdemidkin.libdto.cash.CashProcessResponse;
 import ru.mdemidkin.libdto.cash.CashRequest;
-import ru.mdemidkin.libdto.account.Currency;
 import ru.mdemidkin.libdto.settings.EditAccountsRequest;
 import ru.mdemidkin.libdto.settings.EditPasswordRequest;
 import ru.mdemidkin.libdto.signup.SignupRequest;
 import ru.mdemidkin.libdto.signup.SignupResponse;
-import ru.mdemidkin.libdto.account.UserDto;
 
 import java.math.BigDecimal;
 import java.net.URI;

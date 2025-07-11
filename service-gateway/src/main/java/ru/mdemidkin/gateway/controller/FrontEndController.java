@@ -20,8 +20,8 @@ import reactor.core.publisher.Mono;
 import ru.mdemidkin.gateway.client.AccountsClient;
 import ru.mdemidkin.libdto.account.AccountDto;
 import ru.mdemidkin.libdto.account.Currency;
-import ru.mdemidkin.libdto.signup.SignupRequest;
 import ru.mdemidkin.libdto.account.UserDto;
+import ru.mdemidkin.libdto.signup.SignupRequest;
 
 import java.security.Principal;
 import java.util.List;

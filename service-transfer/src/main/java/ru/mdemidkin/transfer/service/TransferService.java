@@ -11,11 +11,11 @@ import reactor.core.publisher.Mono;
 import ru.mdemidkin.libdto.account.AccountDto;
 import ru.mdemidkin.libdto.cash.CashAction;
 import ru.mdemidkin.libdto.cash.CashRequest;
+import ru.mdemidkin.libdto.transfer.TransferRequest;
 import ru.mdemidkin.transfer.client.AccountsClient;
 import ru.mdemidkin.transfer.client.BlockersClient;
 import ru.mdemidkin.transfer.client.ConvertClient;
 import ru.mdemidkin.transfer.client.NotificationsClient;
-import ru.mdemidkin.libdto.transfer.TransferRequest;
 import ru.mdemidkin.transfer.exception.AccountNotFoundException;
 import ru.mdemidkin.transfer.exception.InsufficientFundsException;
 import ru.mdemidkin.transfer.exception.TransferException;
@@ -75,11 +75,7 @@ public class TransferService {
                                     return Mono.error(new InsufficientFundsException(message));
                                 }
 
-                                return convertClient.convertAmount(
-                                                transferRequest.getFromCurrency(),
-                                                transferRequest.getToCurrency(),
-                                                transferRequest.getValue()
-                                        )
+                                return convertClient.convertAmount(transferRequest)
                                         .flatMap(convertedAmount -> {
                                             CashRequest withdrawRequest = CashRequest.builder()
                                                     .currency(transferRequest.getFromCurrency())

@@ -17,7 +17,7 @@ public class ExchangeRatesController {
     private final ExchangeRateService exchangeRateService;
 
     @GetMapping("/api/rates")
-    public Flux<CurrencyDto> getUserByUsername() {
+    public Flux<CurrencyDto> getCurrencies() {
         return exchangeRateService.getAllCurrentRates()
                 .map(this::mapToDto);
     }

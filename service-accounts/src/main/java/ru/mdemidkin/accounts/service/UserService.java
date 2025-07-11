@@ -9,10 +9,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.mdemidkin.accounts.model.User;
 import ru.mdemidkin.accounts.repository.UserRepository;
+import ru.mdemidkin.libdto.account.UserDto;
 import ru.mdemidkin.libdto.settings.EditAccountsRequest;
 import ru.mdemidkin.libdto.settings.EditPasswordRequest;
 import ru.mdemidkin.libdto.signup.SignupRequest;
-import ru.mdemidkin.libdto.account.UserDto;
 
 import java.time.LocalDate;
 
