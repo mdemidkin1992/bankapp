@@ -25,12 +25,6 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-zookeeper-discovery")
 }
 
-dependencyManagement {
-    imports {
-        mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
-    }
-}
-
 tasks.withType<Test> {
     useJUnitPlatform()
 }

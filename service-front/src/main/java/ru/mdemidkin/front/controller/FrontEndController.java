@@ -63,9 +63,6 @@ public class FrontEndController {
         String loginAttribute = exchange.getAttribute("login");
         String identifiedLogin = identifyUsername(loginAttribute, exchange);
 
-        log.info("exchange.getAttribute {}, identifiedLogin {}, header {}", loginAttribute, identifiedLogin,
-                exchange.getRequest().getHeaders().getFirst("X-User-Login"));
-
         Mono<UserDto> currentUserMono = accountsClient.getUserDto(identifiedLogin);
         Mono<List<AccountDto>> accountsMono = accountsClient.getAccountsList(identifiedLogin);
         Mono<List<UserDto>> usersMono = accountsClient.getUsers();

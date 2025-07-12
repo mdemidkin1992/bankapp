@@ -1,0 +1,10 @@
+spring:
+  config:
+    import: optional:classpath:application-test.properties
+  cloud:
+    config:
+      enabled: false
+    zookeeper:
+      enabled: false
+      discovery:
+        enabled: false

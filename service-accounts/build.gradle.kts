@@ -47,6 +47,9 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testCompileOnly("org.projectlombok:lombok")
     testAnnotationProcessor("org.projectlombok:lombok")
+    testImplementation("io.r2dbc:r2dbc-h2")
+    testImplementation("com.h2database:h2")
+    testImplementation("org.springframework.security:spring-security-test")
 }
 
 tasks.withType<Test> {
