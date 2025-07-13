@@ -35,6 +35,9 @@ public final class ValidationUtils {
 
     public static List<String> validateEditUserAccountsRequest(@NonNull EditAccountsRequest editAccountsRequest) {
         List<String> errors = new ArrayList<>();
+        if (editAccountsRequest.getName() == null || editAccountsRequest.getName().isBlank()) {
+            errors.add("Имя пользователя не должно быть пустым");
+        }
         if (editAccountsRequest.getBirthdate() != null && !editAccountsRequest.getBirthdate().isBlank()) {
             try {
                 LocalDate birthdate = LocalDate.parse(editAccountsRequest.getBirthdate());
