@@ -1,5 +1,7 @@
 package ru.mdemidkin.cash.client;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -19,6 +21,8 @@ public class NotificationsClient {
     @Value("${services.service-gateway.name}")
     private String gateway;
 
+    @Retry(name = "gateway-service")
+    @CircuitBreaker(name = "gateway-service", fallbackMethod = "sendNotificationFallback")
     public Mono<NotificationDto> sendNotification(String login, String message) {
         return webClient.post()
                 .uri("http://" + gateway + "/api/{login}/notifications", login)
@@ -27,5 +31,11 @@ public class NotificationsClient {
                 .bodyValue(message)
                 .retrieve()
                 .bodyToMono(NotificationDto.class);
+    }
+
+    private Mono<NotificationDto> sendNotificationFallback() {
+        return Mono.just(NotificationDto.builder()
+                .message("Ошибка соединения с сервером")
+                .build());
     }
 }

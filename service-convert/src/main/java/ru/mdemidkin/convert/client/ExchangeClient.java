@@ -1,5 +1,7 @@
 package ru.mdemidkin.convert.client;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,11 +20,17 @@ public class ExchangeClient {
     @Value("${services.service-gateway.name}")
     private String gateway;
 
+    @Retry(name = "gateway-service")
+    @CircuitBreaker(name = "gateway-service", fallbackMethod = "getCurrenciesFallback")
     public Flux<CurrencyDto> getCurrencies() {
         return webClient.get()
                 .uri("http://" + gateway + "/api/rates")
                 .acceptCharset(StandardCharsets.UTF_8)
                 .retrieve()
                 .bodyToFlux(CurrencyDto.class);
+    }
+
+    private Flux<CurrencyDto> getCurrenciesFallback() {
+        return Flux.empty();
     }
 }

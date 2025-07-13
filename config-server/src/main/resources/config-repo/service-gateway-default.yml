@@ -161,3 +161,16 @@ spring:
   thymeleaf:
     encoding: UTF-8
     mode: HTML
+
+# Circuit Breaker
+resilience4j:
+  retry:
+    instances:
+      gateway-service:
+        max-attempts: 3
+        wait-duration: 1s
+  circuitbreaker:
+    instances:
+      gateway-service:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s

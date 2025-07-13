@@ -1,5 +1,7 @@
 package ru.mdemidkin.transfer.client;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -18,6 +20,8 @@ public class BlockersClient {
     @Value("${services.service-gateway.name}")
     private String gateway;
 
+    @Retry(name = "gateway-service")
+    @CircuitBreaker(name = "gateway-service", fallbackMethod = "sendBlockerRequestFallback")
     public Mono<Boolean> sendBlockerRequest(String time) {
         return webClient.post()
                 .uri("http://" + gateway + "/api/{time}/block", time)
@@ -25,5 +29,9 @@ public class BlockersClient {
                 .acceptCharset(StandardCharsets.UTF_8)
                 .retrieve()
                 .bodyToMono(Boolean.class);
+    }
+
+    private Mono<Boolean> sendBlockerRequestFallback() {
+        return Mono.just(Boolean.TRUE);
     }
 }
