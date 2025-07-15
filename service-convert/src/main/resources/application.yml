@@ -1,0 +1,9 @@
+spring:
+
+  # Service Discovery
+  application:
+    name: service-convert
+
+  # Config Server
+  config:
+    import: configserver:${CONFIG_SERVER_URL:http://127.0.0.1:8888}
