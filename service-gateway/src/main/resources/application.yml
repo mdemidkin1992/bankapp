@@ -1,9 +1,202 @@
+server:
+  port: 8080
+
 spring:
 
   # Service Discovery
   application:
     name: service-gateway
 
-  # Config Server
-  config:
-    import: configserver:${CONFIG_SERVER_URL:http://127.0.0.1:8888}
+  main:
+    allow-bean-definition-overriding: true # убрать после dev
+
+  # Cloud
+  cloud:
+    # Zookeeper
+    zookeeper:
+      discovery:
+        enabled: true
+      connect-string: localhost:2181
+
+    # Gateway (service-locator)
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: front-route
+              uri: lb://service-front
+              predicates:
+                - Path=/
+              filters:
+                - TokenRelay=bankapp-client
+                - UserHeader
+
+            - id: front-main-route
+              uri: lb://service-front
+              predicates:
+                - Path=/main
+              filters:
+                - TokenRelay=bankapp-client
+                - UserHeader
+
+            - id: accounts-post-signup-route
+              uri: lb://service-accounts
+              predicates:
+                - Path=/api/signup
+                - Method=POST
+              filters:
+                - TokenRelay=bankapp-client
+
+            - id: edit-password-route
+              uri: lb://service-accounts
+              predicates:
+                - Path=/user/{login}/editPassword
+              filters:
+                - TokenRelay=bankapp-client
+
+            - id: exchange-route
+              uri: lb://service-exchange
+              predicates:
+                - Path=/api/rates
+              filters:
+                - TokenRelay=bankapp-client
+
+            - id: edit-accounts-route
+              uri: lb://service-accounts
+              predicates:
+                - Path=/user/{login}/editUserAccounts
+              filters:
+                - TokenRelay=bankapp-client
+
+            - id: cash-route
+              uri: lb://service-cash
+              predicates:
+                - Path=/user/{login}/cash
+              filters:
+                - TokenRelay=bankapp-client
+
+            - id: notifications-route
+              uri: lb://service-notifications
+              predicates:
+                - Path=/api/{login}/notifications
+              filters:
+                - TokenRelay=bankapp-client
+
+            - id: transfer-route
+              uri: lb://service-transfer
+              predicates:
+                - Path=/user/{login}/transfer
+              filters:
+                - TokenRelay=bankapp-client
+
+            - id: blocker-route
+              uri: lb://service-blocker
+              predicates:
+                - Path=/api/{time}/block
+              filters:
+                - TokenRelay=bankapp-client
+
+            - id: cash-balance-route
+              uri: lb://service-accounts
+              predicates:
+                - Path=/api/{login}/cash
+              filters:
+                - TokenRelay=bankapp-client
+
+            - id: get-account-route
+              uri: lb://service-accounts
+              predicates:
+                - Path=/api/{login}/account/{currency}
+              filters:
+                - TokenRelay=bankapp-client
+
+            - id: convert-route
+              uri: lb://service-convert
+              predicates:
+                - Path=/api/convert
+              filters:
+                - TokenRelay=bankapp-client
+
+            - id: accounts-user-route
+              uri: lb://service-accounts
+              predicates:
+                - Path=/api/{login}/user
+              filters:
+                - TokenRelay=bankapp-client
+
+            - id: accounts-user-accounts-route
+              uri: lb://service-accounts
+              predicates:
+                - Path=/api/{login}/accounts
+              filters:
+                - TokenRelay=bankapp-client
+
+            - id: accounts-users-route
+              uri: lb://service-accounts
+              predicates:
+                - Path=/api/users
+              filters:
+                - TokenRelay=bankapp-client
+
+            - id: accounts-currencies-route
+              uri: lb://service-accounts
+              predicates:
+                - Path=/api/currencies
+              filters:
+                - TokenRelay=bankapp-client
+
+  # Security
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            token-uri: http://localhost:8180/realms/bankapp/protocol/openid-connect/token
+            authorization-uri: http://localhost:8180/realms/bankapp/protocol/openid-connect/auth
+            jwk-set-uri: http://localhost:8180/realms/bankapp/protocol/openid-connect/certs
+        registration:
+          bankapp-client:
+            client-id: bankapp-client
+            client-secret: VmGXQDXNGOZzJH5Mx7Fi4OyHtnb3IH8A
+            authorization-grant-type: client_credentials
+            scope: openid
+            provider: keycloak
+
+  # Thymeleaf
+  thymeleaf:
+    encoding: UTF-8
+    mode: HTML
+
+# Circuit Breaker
+resilience4j:
+  retry:
+    instances:
+      gateway-service:
+        max-attempts: 3
+        wait-duration: 1s
+  circuitbreaker:
+    instances:
+      gateway-service:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
+
+headers:
+  user-header: X-User-Login
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    web: info
+    org.springframework.security: info
+
+services:
+  service-gateway:
+    name: "localhost:8080"
