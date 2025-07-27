@@ -12,11 +12,6 @@ spring:
 
   # Cloud
   cloud:
-    # Zookeeper
-    zookeeper:
-      discovery:
-        enabled: true
-      connect-string: localhost:2181
 
   # Security
   security:

@@ -44,6 +44,29 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
+          env:
+            # OAuth2 Configuration from ConfigMap
+            - name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "service-exchange.fullname" . }}-config
+                  key: oauth2-resource-server-jwk-set-uri
+            # Database Configuration
+            - name: SPRING_R2DBC_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "service-exchange.fullname" . }}-config
+                  key: r2dbc-url
+            - name: SPRING_R2DBC_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "service-exchange.fullname" . }}-config
+                  key: r2dbc-username
+            - name: SPRING_R2DBC_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "service-exchange.fullname" . }}-secret
+                  key: db-password
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}

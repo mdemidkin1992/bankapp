@@ -9,16 +9,10 @@ keycloak:
     username: admin
     password: admin
   
-  # Database configuration (for production, consider external DB)
+  # Database configuration disabled for development mode
+  # Keycloak will use in-memory H2 database in start-dev mode
   database:
-    vendor: h2
-    # For PostgreSQL:
-    # vendor: postgres
-    # hostname: postgresql-keycloak
-    # port: 5432
-    # database: keycloak
-    # username: keycloak
-    # password: keycloak
+    vendor: ""  # Empty to disable database configuration
   
   # Keycloak configuration
   hostname: localhost

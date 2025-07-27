@@ -14,6 +14,8 @@ keycloak:
     admin:
       username: admin
       password: admin
+    database:
+      vendor: ""  # Empty to disable database configuration for dev mode
   ingress:
     enabled: true
     hosts:

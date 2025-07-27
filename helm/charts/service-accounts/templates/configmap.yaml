@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "service-accounts.fullname" . }}-config
+  labels:
+    {{- include "service-accounts.labels" . | nindent 4 }}
+data:
+  # OAuth2 Configuration
+  oauth2-resource-server-jwk-set-uri: "http://bankapp-keycloak:8080/realms/bankapp/protocol/openid-connect/certs"
+  oauth2-client-provider-authorization-uri: "http://bankapp-keycloak:8080/realms/bankapp/protocol/openid-connect/auth"
+  oauth2-client-provider-token-uri: "http://bankapp-keycloak:8080/realms/bankapp/protocol/openid-connect/token"
+  oauth2-client-provider-jwk-set-uri: "http://bankapp-keycloak:8080/realms/bankapp/protocol/openid-connect/certs"
+  oauth2-client-id: "bankapp-client"
+  oauth2-client-provider: "keycloak"
+  
+  # Database Configuration
+  r2dbc-url: "r2dbc:postgresql://bankapp-postgresql-accounts:5432/accounts-db"
+  r2dbc-username: "postgres"
