@@ -19,7 +19,7 @@ spring:
         webflux:
           routes:
             - id: front-route
-              uri: lb://service-front
+              uri: http://bankapp-service-front:8079
               predicates:
                 - Path=/
               filters:
@@ -27,7 +27,7 @@ spring:
                 - UserHeader
 
             - id: front-main-route
-              uri: lb://service-front
+              uri: http://bankapp-service-front:8079
               predicates:
                 - Path=/main
               filters:
@@ -35,7 +35,7 @@ spring:
                 - UserHeader
 
             - id: accounts-post-signup-route
-              uri: lb://service-accounts
+              uri: http://bankapp-service-accounts:8084
               predicates:
                 - Path=/api/signup
                 - Method=POST
@@ -43,98 +43,98 @@ spring:
                 - TokenRelay=bankapp-client
 
             - id: edit-password-route
-              uri: lb://service-accounts
+              uri: http://bankapp-service-accounts:8084
               predicates:
                 - Path=/user/{login}/editPassword
               filters:
                 - TokenRelay=bankapp-client
 
             - id: exchange-route
-              uri: lb://service-exchange
+              uri: http://bankapp-service-exchange:8085
               predicates:
                 - Path=/api/rates
               filters:
                 - TokenRelay=bankapp-client
 
             - id: edit-accounts-route
-              uri: lb://service-accounts
+              uri: http://bankapp-service-accounts:8084
               predicates:
                 - Path=/user/{login}/editUserAccounts
               filters:
                 - TokenRelay=bankapp-client
 
             - id: cash-route
-              uri: lb://service-cash
+              uri: http://bankapp-service-cash:8086
               predicates:
                 - Path=/user/{login}/cash
               filters:
                 - TokenRelay=bankapp-client
 
             - id: notifications-route
-              uri: lb://service-notifications
+              uri: http://bankapp-service-notifications:8087
               predicates:
                 - Path=/api/{login}/notifications
               filters:
                 - TokenRelay=bankapp-client
 
             - id: transfer-route
-              uri: lb://service-transfer
+              uri: http://bankapp-service-transfer:8082
               predicates:
                 - Path=/user/{login}/transfer
               filters:
                 - TokenRelay=bankapp-client
 
             - id: blocker-route
-              uri: lb://service-blocker
+              uri: http://bankapp-service-blocker:8083
               predicates:
                 - Path=/api/{time}/block
               filters:
                 - TokenRelay=bankapp-client
 
             - id: cash-balance-route
-              uri: lb://service-accounts
+              uri: http://bankapp-service-accounts:8084
               predicates:
                 - Path=/api/{login}/cash
               filters:
                 - TokenRelay=bankapp-client
 
             - id: get-account-route
-              uri: lb://service-accounts
+              uri: http://bankapp-service-accounts:8084
               predicates:
                 - Path=/api/{login}/account/{currency}
               filters:
                 - TokenRelay=bankapp-client
 
             - id: convert-route
-              uri: lb://service-convert
+              uri: http://bankapp-service-convert:8081
               predicates:
                 - Path=/api/convert
               filters:
                 - TokenRelay=bankapp-client
 
             - id: accounts-user-route
-              uri: lb://service-accounts
+              uri: http://bankapp-service-accounts:8084
               predicates:
                 - Path=/api/{login}/user
               filters:
                 - TokenRelay=bankapp-client
 
             - id: accounts-user-accounts-route
-              uri: lb://service-accounts
+              uri: http://bankapp-service-accounts:8084
               predicates:
                 - Path=/api/{login}/accounts
               filters:
                 - TokenRelay=bankapp-client
 
             - id: accounts-users-route
-              uri: lb://service-accounts
+              uri: http://bankapp-service-accounts:8084
               predicates:
                 - Path=/api/users
               filters:
                 - TokenRelay=bankapp-client
 
             - id: accounts-currencies-route
-              uri: lb://service-accounts
+              uri: http://bankapp-service-accounts:8084
               predicates:
                 - Path=/api/currencies
               filters:
@@ -194,4 +194,4 @@ logging:
 
 services:
   service-gateway:
-    name: "localhost:8080"
+    name: "bankapp-service-gateway:8080"

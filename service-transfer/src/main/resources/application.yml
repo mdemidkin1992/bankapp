@@ -19,7 +19,7 @@ spring:
         webflux:
           routes:
             - id: service-front-route
-              uri: lb://service-gateway
+              uri: http://bankapp-service-gateway:8080
               predicates:
                 - Path=/
               filters:
@@ -74,4 +74,4 @@ logging:
 
 services:
   service-gateway:
-    name: "localhost:8080"
+    name: "bankapp-service-gateway:8080"
