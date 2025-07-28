@@ -91,7 +91,7 @@ livenessProbe:
   httpGet:
     path: /actuator/health
     port: 8083
-  initialDelaySeconds: 180
+  initialDelaySeconds: 300
   periodSeconds: 10
   timeoutSeconds: 5
   failureThreshold: 3
