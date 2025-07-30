@@ -307,6 +307,33 @@ pipeline {
             }
         }
 
+        stage('Подготовка Helm зависимостей') {
+            steps {
+                sh "helm dependency build ./helm/bankapp"
+            }
+        }
+
+        stage('Очистка конфликтующих ресурсов') {
+            steps {
+                script {
+                    def namespace = ""
+                    if (params.DEPLOY_ENV == 'dev') {
+                        namespace = K8S_NAMESPACE_DEV
+                    } else if (params.DEPLOY_ENV == 'test') {
+                        namespace = K8S_NAMESPACE_TEST
+                    } else if (params.DEPLOY_ENV == 'prod') {
+                        namespace = K8S_NAMESPACE_PROD
+                    }
+                    
+                    sh """
+                        # Удаляем конфликтующие Ingress ресурсы
+                        kubectl delete ingress --all -n ${namespace} --ignore-not-found=true || true
+                        kubectl delete ingress --all -n bankapp --ignore-not-found=true || true
+                    """
+                }
+            }
+        }
+
         stage('Деплой Dev') {
             when {
                 anyOf {
@@ -332,7 +359,7 @@ pipeline {
                         helm upgrade --install bankapp ./helm/bankapp \\
                         --namespace ${namespace} \\
                         --create-namespace \\
-                        --wait --timeout=600s
+                        --timeout=300s
                     """
                 }
             }
