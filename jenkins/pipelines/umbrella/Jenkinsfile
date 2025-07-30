@@ -340,7 +340,9 @@ pipeline {
 
         stage('Запуск Helm тестов') {
             when {
-                not { params.SKIP_TESTS == true }
+                not { 
+                    equals expected: true, actual: params.SKIP_TESTS
+                }
             }
             steps {
                 script {
