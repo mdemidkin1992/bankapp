@@ -257,55 +257,6 @@ pipeline {
             }
         }
 
-        stage('Загрузка образов в Minikube') {
-            parallel {
-                stage('Load service-accounts') {
-                    steps {
-                        sh "minikube image load service-accounts-app:latest"
-                    }
-                }
-                stage('Load service-gateway') {
-                    steps {
-                        sh "minikube image load service-gateway-app:latest"
-                    }
-                }
-                stage('Load service-cash') {
-                    steps {
-                        sh "minikube image load service-cash-app:latest"
-                    }
-                }
-                stage('Load service-transfer') {
-                    steps {
-                        sh "minikube image load service-transfer-app:latest"
-                    }
-                }
-                stage('Load service-convert') {
-                    steps {
-                        sh "minikube image load service-convert-app:latest"
-                    }
-                }
-                stage('Load service-exchange') {
-                    steps {
-                        sh "minikube image load service-exchange-app:latest"
-                    }
-                }
-                stage('Load service-blocker') {
-                    steps {
-                        sh "minikube image load service-blocker-app:latest"
-                    }
-                }
-                stage('Load service-notifications') {
-                    steps {
-                        sh "minikube image load service-notifications-app:latest"
-                    }
-                }
-                stage('Load service-front') {
-                    steps {
-                        sh "minikube image load service-front-app:latest"
-                    }
-                }
-            }
-        }
 
         stage('Подготовка Helm зависимостей') {
             steps {
