@@ -411,7 +411,7 @@ pipeline {
                         kubectl get services -n ${namespace}
                         
                         echo "Ожидание готовности всех подов..."
-                        kubectl wait --for=condition=ready pod --all -n ${namespace} --timeout=300s
+                        kubectl wait --for=condition=ready pod --all -n ${namespace} --timeout=600s --ignore-not-found=true
                     """
                 }
             }

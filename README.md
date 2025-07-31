@@ -192,12 +192,3 @@ WORKDIR /app
 COPY service-*/build/libs/*.jar app.jar
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 ```
-
-## Jenkins
-
-Запуск Jenkins:
-
-```
-java -Dhudson.plugins.git.GitSCM.ALLOW_LOCAL_CHECKOUT=true -jar jenkins.war
-```
-
