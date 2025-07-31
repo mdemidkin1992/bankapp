@@ -192,3 +192,83 @@ WORKDIR /app
 COPY service-*/build/libs/*.jar app.jar
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]
 ```
+
+## CI/CD и деплой в Kubernetes
+
+### Настройка Kubernetes
+
+1. **Включите Kubernetes в Docker Desktop**:
+    - Settings → Kubernetes → Enable Kubernetes → Apply & Restart
+
+2. **Переключитесь на контекст docker-desktop**:
+```bash
+kubectl config use-context docker-desktop
+```
+
+### Локальный запуск Jenkins
+
+1. **Создайте файл `jenkins/.env`**
+```properties
+KUBECONFIG_PATH=/путь/к/вашему/jenkins_kubeconfig.yaml
+GHCR_TOKEN=your_github_token
+GITHUB_USERNAME=your_github_username
+GITHUB_TOKEN=your_github_token
+GITHUB_REPOSITORY=your_username/bankapp
+DOCKER_REGISTRY=ghcr.io/your_username
+DB_PASSWORD=postgres
+```
+
+2. **Создайте файл `jenkins_kubeconfig.yaml`** в корне проекта:
+```bash
+cp ~/.kube/config jenkins_kubeconfig.yaml 
+```
+
+В созданном файле добавить строки `server` и `insecure-skip-tls-verify`:
+
+```yaml
+clusters:
+- cluster:
+    server: https://host.docker.internal:6443
+    insecure-skip-tls-verify: true
+  name: docker-desktop
+```
+
+3. **Запустите Jenkins**:
+```bash
+cd jenkins
+docker-compose up -d
+```
+
+4. **Откройте Jenkins**: http://localhost:8080
+
+### Настройка Ingress
+
+1. **Установите Ingress Controller**:
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.4/deploy/static/provider/cloud/deploy.yaml
+```
+
+2. **Добавьте в `/etc/hosts`**:
+```
+127.0.0.1 bankapp.local
+```
+
+### Запуск приложения через Jenkins
+
+1. Зайдите в Jenkins → BankAppHelm
+2. Выберите ветку или Pull Request
+3. Нажмите "Build with Parameters"
+4. Выберите окружение (dev/test/prod)
+5. Запустите билд
+
+### Открыть приложение в браузере
+
+Проверить готовность подов:
+
+```bash
+kubectl get pods -n bankapp-dev
+```
+
+После успешного деплоя приложение будет доступно по адресу: http://bankapp.local
+
+Для удаления деплоя использовать `jenkins/nuke-all.sh`.
