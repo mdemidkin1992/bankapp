@@ -1,0 +1,265 @@
+pipeline {
+    agent any
+
+    environment {
+        K8S_NAMESPACE_DEV = 'bankapp-dev'
+        K8S_NAMESPACE_TEST = 'bankapp-test'
+        K8S_NAMESPACE_PROD = 'bankapp-prod'
+        
+        SERVICE_ACCOUNTS_TAG = 'latest'
+        SERVICE_GATEWAY_TAG = 'latest'
+        SERVICE_FRONT_TAG = 'latest'
+        SERVICE_CASH_TAG = 'latest'
+        SERVICE_TRANSFER_TAG = 'latest'
+        SERVICE_CONVERT_TAG = 'latest'
+        SERVICE_EXCHANGE_TAG = 'latest'
+        SERVICE_BLOCKER_TAG = 'latest'
+        SERVICE_NOTIFICATIONS_TAG = 'latest'
+    }
+
+    parameters {
+        string(name: 'SERVICE_ACCOUNTS_TAG', defaultValue: 'latest', description: 'service-accounts image tag')
+        string(name: 'SERVICE_GATEWAY_TAG', defaultValue: 'latest', description: 'service-gateway image tag')
+        string(name: 'SERVICE_FRONT_TAG', defaultValue: 'latest', description: 'service-front image tag')
+        string(name: 'SERVICE_CASH_TAG', defaultValue: 'latest', description: 'service-cash image tag')
+        string(name: 'SERVICE_TRANSFER_TAG', defaultValue: 'latest', description: 'service-transfer image tag')
+        string(name: 'SERVICE_CONVERT_TAG', defaultValue: 'latest', description: 'service-convert image tag')
+        string(name: 'SERVICE_EXCHANGE_TAG', defaultValue: 'latest', description: 'service-exchange image tag')
+        string(name: 'SERVICE_BLOCKER_TAG', defaultValue: 'latest', description: 'service-blocker image tag')
+        string(name: 'SERVICE_NOTIFICATIONS_TAG', defaultValue: 'latest', description: 'service-notifications image tag')
+        
+        choice(name: 'DEPLOY_ENV', choices: ['dev', 'test', 'prod'], description: 'Environment to deploy to')
+        booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip Helm tests')
+    }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        disableConcurrentBuilds()
+    }
+
+    stages {
+        stage('Инициализация') {
+            steps {
+                echo "Запуск полного цикла сборки и деплоя bankapp"
+                echo "Окружение: ${params.DEPLOY_ENV}"
+            }
+        }
+
+        stage('Получение исходников') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Сборка всех проектов') {
+            steps {
+                sh "./gradlew clean build -x test"
+                archiveArtifacts artifacts: "**/build/libs/*.jar", fingerprint: true
+            }
+        }
+
+        stage('Запуск тестов') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh "./gradlew test"
+                }
+            }
+            post {
+                always {
+                    junit "**/build/test-results/test/*.xml"
+                }
+            }
+        }
+
+        stage('Сборка Docker образов') {
+            parallel {
+                stage('service-accounts образ') {
+                    steps {
+                        sh """
+                            docker build -f service-accounts/Dockerfile \\
+                            --build-arg JAR_FILE=build/libs/*.jar \\
+                            -t service-accounts-app:latest .
+                        """
+                    }
+                }
+                stage('service-gateway образ') {
+                    steps {
+                        sh """
+                            docker build -f service-gateway/Dockerfile \\
+                            --build-arg JAR_FILE=build/libs/*.jar \\
+                            -t service-gateway-app:latest .
+                        """
+                    }
+                }
+                stage('service-cash образ') {
+                    steps {
+                        sh """
+                            docker build -f service-cash/Dockerfile \\
+                            --build-arg JAR_FILE=build/libs/*.jar \\
+                            -t service-cash-app:latest .
+                        """
+                    }
+                }
+                stage('service-transfer образ') {
+                    steps {
+                        sh """
+                            docker build -f service-transfer/Dockerfile \\
+                            --build-arg JAR_FILE=build/libs/*.jar \\
+                            -t service-transfer-app:latest .
+                        """
+                    }
+                }
+                stage('service-convert образ') {
+                    steps {
+                        sh """
+                            docker build -f service-convert/Dockerfile \\
+                            --build-arg JAR_FILE=build/libs/*.jar \\
+                            -t service-convert-app:latest .
+                        """
+                    }
+                }
+                stage('service-exchange образ') {
+                    steps {
+                        sh """
+                            docker build -f service-exchange/Dockerfile \\
+                            --build-arg JAR_FILE=build/libs/*.jar \\
+                            -t service-exchange-app:latest .
+                        """
+                    }
+                }
+                stage('service-blocker образ') {
+                    steps {
+                        sh """
+                            docker build -f service-blocker/Dockerfile \\
+                            --build-arg JAR_FILE=build/libs/*.jar \\
+                            -t service-blocker-app:latest .
+                        """
+                    }
+                }
+                stage('service-notifications образ') {
+                    steps {
+                        sh """
+                            docker build -f service-notifications/Dockerfile \\
+                            --build-arg JAR_FILE=build/libs/*.jar \\
+                            -t service-notifications-app:latest .
+                        """
+                    }
+                }
+                stage('service-front образ') {
+                    steps {
+                        sh """
+                            docker build -f service-front/Dockerfile \\
+                            --build-arg JAR_FILE=build/libs/*.jar \\
+                            -t service-front-app:latest .
+                        """
+                    }
+                }
+            }
+        }
+
+
+        stage('Подготовка Helm зависимостей') {
+            steps {
+                sh "helm dependency build ./helm/bankapp"
+            }
+        }
+
+        stage('Очистка конфликтующих ресурсов') {
+            steps {
+                script {
+                    def namespace = ""
+                    if (params.DEPLOY_ENV == 'dev') {
+                        namespace = K8S_NAMESPACE_DEV
+                    } else if (params.DEPLOY_ENV == 'test') {
+                        namespace = K8S_NAMESPACE_TEST
+                    } else if (params.DEPLOY_ENV == 'prod') {
+                        namespace = K8S_NAMESPACE_PROD
+                    }
+                    
+                    sh """
+                        # Удаляем конфликтующие Ingress ресурсы
+                        kubectl delete ingress --all -n ${namespace} --ignore-not-found=true || true
+                        kubectl delete ingress --all -n bankapp --ignore-not-found=true || true
+                    """
+                }
+            }
+        }
+
+        stage('Деплой Dev') {
+            when {
+                anyOf {
+                    expression { params.DEPLOY_ENV == 'dev' }
+                    expression { params.DEPLOY_ENV == 'test' }
+                    expression { params.DEPLOY_ENV == 'prod' }
+                }
+            }
+            steps {
+                script {
+                    def namespace = ""
+                    if (params.DEPLOY_ENV == 'dev') {
+                        namespace = K8S_NAMESPACE_DEV
+                    } else if (params.DEPLOY_ENV == 'test') {
+                        namespace = K8S_NAMESPACE_TEST
+                    } else if (params.DEPLOY_ENV == 'prod') {
+                        namespace = K8S_NAMESPACE_PROD
+                    }
+                    
+                    echo "Деплой в окружение ${params.DEPLOY_ENV} (namespace: ${namespace})"
+                    
+                    sh """
+                        helm upgrade --install bankapp ./helm/bankapp \\
+                        --namespace ${namespace} \\
+                        --create-namespace \\
+                        --timeout=300s
+                    """
+                }
+            }
+        }
+
+
+        stage('Подтверждение для Production') {
+            when {
+                expression { params.DEPLOY_ENV == 'prod' }
+            }
+            input {
+                message "Подтвердите деплой в Production"
+                ok "Deploy to Production"
+                parameters {
+                    choice(name: 'CONFIRM_PROD', choices: ['no', 'yes'], description: 'Подтвердить деплой в production')
+                }
+            }
+            steps {
+                script {
+                    if (params.CONFIRM_PROD != 'yes') {
+                        error("Деплой в production отменен пользователем")
+                    }
+                    echo "Деплой в production подтвержден"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                def namespace = ""
+                if (params.DEPLOY_ENV == 'dev') {
+                    namespace = K8S_NAMESPACE_DEV
+                } else if (params.DEPLOY_ENV == 'test') {
+                    namespace = K8S_NAMESPACE_TEST
+                } else if (params.DEPLOY_ENV == 'prod') {
+                    namespace = K8S_NAMESPACE_PROD
+                }
+                
+                echo "Итоговый статус деплоя в ${params.DEPLOY_ENV}:"
+                sh "kubectl get pods -n ${namespace} || true"
+            }
+        }
+        success {
+            echo "Umbrella деплой bankapp в ${params.DEPLOY_ENV} завершен успешно"
+        }
+        failure {
+            echo "Umbrella деплой bankapp в ${params.DEPLOY_ENV} завершился с ошибкой"
+        }
+    }
+}

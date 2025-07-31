@@ -1,0 +1,87 @@
+pipeline {
+    agent any
+
+    environment {
+        SERVICE_NAME = 'service-convert'
+        IMAGE_NAME = 'service-convert-app'
+        GRADLE_MODULE = 'service-convert'
+        K8S_NAMESPACE_DEV = 'bankapp-dev'
+        K8S_NAMESPACE_TEST = 'bankapp-test'
+        K8S_NAMESPACE_PROD = 'bankapp-prod'
+    }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+        disableConcurrentBuilds()
+    }
+
+    stages {
+        stage('Инициализация') {
+            steps {
+                echo "Запуск пайплайна для проекта: ${SERVICE_NAME}"
+            }
+        }
+
+        stage('Получение исходников') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Сборка проекта') {
+            steps {
+                sh "./gradlew :${GRADLE_MODULE}:clean :${GRADLE_MODULE}:build -x test"
+                archiveArtifacts artifacts: "${GRADLE_MODULE}/build/libs/*.jar", fingerprint: true
+            }
+        }
+
+        stage('Запуск тестов') {
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh "./gradlew :${GRADLE_MODULE}:test"
+                }
+            }
+            post {
+                always {
+                    junit "${GRADLE_MODULE}/build/test-results/test/*.xml"
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: "${GRADLE_MODULE}/build/reports/tests/test",
+                        reportFiles: 'index.html',
+                        reportName: '${GRADLE_MODULE} Отчет о тестировании'
+                    ])
+                }
+            }
+        }
+
+        stage('Сборка Docker образов') {
+            steps {
+                script {
+                    sh """
+                        docker build -f ${GRADLE_MODULE}/Dockerfile \
+                        --build-arg JAR_FILE=build/libs/*.jar \
+                        -t ${IMAGE_NAME}:${BUILD_NUMBER} .
+                    """
+                }
+            }
+        }
+
+        stage('Загрузка Docker образов в Minikube') {
+            steps {
+                sh "minikube image load ${IMAGE_NAME}:${BUILD_NUMBER}"
+            }
+        }
+
+    }
+
+    post {
+        success {
+            echo "${SERVICE_NAME} пайплайн прошел успешно"
+        }
+        failure {
+            echo "${SERVICE_NAME} пайплайн завершился с ошибкой"
+        }
+    }
+}
