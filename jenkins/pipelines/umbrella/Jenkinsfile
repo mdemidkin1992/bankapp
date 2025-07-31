@@ -9,29 +9,9 @@ pipeline {
         DOCKER_REGISTRY = credentials('DOCKER_REGISTRY')
         GITHUB_USERNAME = credentials('GITHUB_USERNAME')
         IMAGE_TAG = "${env.BUILD_NUMBER}"
-        
-        SERVICE_ACCOUNTS_TAG = 'latest'
-        SERVICE_GATEWAY_TAG = 'latest'
-        SERVICE_FRONT_TAG = 'latest'
-        SERVICE_CASH_TAG = 'latest'
-        SERVICE_TRANSFER_TAG = 'latest'
-        SERVICE_CONVERT_TAG = 'latest'
-        SERVICE_EXCHANGE_TAG = 'latest'
-        SERVICE_BLOCKER_TAG = 'latest'
-        SERVICE_NOTIFICATIONS_TAG = 'latest'
     }
 
     parameters {
-        string(name: 'SERVICE_ACCOUNTS_TAG', defaultValue: 'latest', description: 'service-accounts image tag')
-        string(name: 'SERVICE_GATEWAY_TAG', defaultValue: 'latest', description: 'service-gateway image tag')
-        string(name: 'SERVICE_FRONT_TAG', defaultValue: 'latest', description: 'service-front image tag')
-        string(name: 'SERVICE_CASH_TAG', defaultValue: 'latest', description: 'service-cash image tag')
-        string(name: 'SERVICE_TRANSFER_TAG', defaultValue: 'latest', description: 'service-transfer image tag')
-        string(name: 'SERVICE_CONVERT_TAG', defaultValue: 'latest', description: 'service-convert image tag')
-        string(name: 'SERVICE_EXCHANGE_TAG', defaultValue: 'latest', description: 'service-exchange image tag')
-        string(name: 'SERVICE_BLOCKER_TAG', defaultValue: 'latest', description: 'service-blocker image tag')
-        string(name: 'SERVICE_NOTIFICATIONS_TAG', defaultValue: 'latest', description: 'service-notifications image tag')
-        
         choice(name: 'DEPLOY_ENV', choices: ['dev', 'test', 'prod'], description: 'Environment to deploy to')
         booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip Helm tests')
     }
@@ -82,18 +62,16 @@ pipeline {
                         sh """
                             docker build -f service-accounts/Dockerfile \\
                             --build-arg JAR_FILE=build/libs/*.jar \\
-                            -t ${DOCKER_REGISTRY}/service-accounts:${IMAGE_TAG} \\
-                            -t service-accounts-app:latest .
+                            -t ${DOCKER_REGISTRY}/service-accounts:${IMAGE_TAG} .
                         """
                     }
                 }
-                stage('service-gateway образ') {
+                stage('service-apigw образ') {
                     steps {
                         sh """
                             docker build -f service-gateway/Dockerfile \\
                             --build-arg JAR_FILE=build/libs/*.jar \\
-                            -t ${DOCKER_REGISTRY}/service-gateway:${IMAGE_TAG} \\
-                            -t service-gateway-app:latest .
+                            -t ${DOCKER_REGISTRY}/service-apigw:${IMAGE_TAG} .
                         """
                     }
                 }
@@ -102,8 +80,7 @@ pipeline {
                         sh """
                             docker build -f service-cash/Dockerfile \\
                             --build-arg JAR_FILE=build/libs/*.jar \\
-                            -t ${DOCKER_REGISTRY}/service-cash:${IMAGE_TAG} \\
-                            -t service-cash-app:latest .
+                            -t ${DOCKER_REGISTRY}/service-cash:${IMAGE_TAG} .
                         """
                     }
                 }
@@ -113,7 +90,7 @@ pipeline {
                             docker build -f service-transfer/Dockerfile \\
                             --build-arg JAR_FILE=build/libs/*.jar \\
                             -t ${DOCKER_REGISTRY}/service-transfer:${IMAGE_TAG} \\
-                            -t service-transfer-app:latest .
+                            .
                         """
                     }
                 }
@@ -122,8 +99,7 @@ pipeline {
                         sh """
                             docker build -f service-convert/Dockerfile \\
                             --build-arg JAR_FILE=build/libs/*.jar \\
-                            -t ${DOCKER_REGISTRY}/service-convert:${IMAGE_TAG} \\
-                            -t service-convert-app:latest .
+                            -t ${DOCKER_REGISTRY}/service-convert:${IMAGE_TAG} .
                         """
                     }
                 }
@@ -132,8 +108,7 @@ pipeline {
                         sh """
                             docker build -f service-exchange/Dockerfile \\
                             --build-arg JAR_FILE=build/libs/*.jar \\
-                            -t ${DOCKER_REGISTRY}/service-exchange:${IMAGE_TAG} \\
-                            -t service-exchange-app:latest .
+                            -t ${DOCKER_REGISTRY}/service-exchange:${IMAGE_TAG} .
                         """
                     }
                 }
@@ -142,8 +117,7 @@ pipeline {
                         sh """
                             docker build -f service-blocker/Dockerfile \\
                             --build-arg JAR_FILE=build/libs/*.jar \\
-                            -t ${DOCKER_REGISTRY}/service-blocker:${IMAGE_TAG} \\
-                            -t service-blocker-app:latest .
+                            -t ${DOCKER_REGISTRY}/service-blocker:${IMAGE_TAG} .
                         """
                     }
                 }
@@ -152,8 +126,7 @@ pipeline {
                         sh """
                             docker build -f service-notifications/Dockerfile \\
                             --build-arg JAR_FILE=build/libs/*.jar \\
-                            -t ${DOCKER_REGISTRY}/service-notifications:${IMAGE_TAG} \\
-                            -t service-notifications-app:latest .
+                            -t ${DOCKER_REGISTRY}/service-notifications:${IMAGE_TAG} .
                         """
                     }
                 }
@@ -162,8 +135,7 @@ pipeline {
                         sh """
                             docker build -f service-front/Dockerfile \\
                             --build-arg JAR_FILE=build/libs/*.jar \\
-                            -t ${DOCKER_REGISTRY}/service-front:${IMAGE_TAG} \\
-                            -t service-front-app:latest .
+                            -t ${DOCKER_REGISTRY}/service-front:${IMAGE_TAG} .
                         """
                     }
                 }
@@ -177,7 +149,7 @@ pipeline {
                         echo \$GHCR_TOKEN | docker login ghcr.io -u ${GITHUB_USERNAME} --password-stdin
                         
                         docker push ${DOCKER_REGISTRY}/service-accounts:${IMAGE_TAG}
-                        docker push ${DOCKER_REGISTRY}/service-gateway:${IMAGE_TAG}
+                        docker push ${DOCKER_REGISTRY}/service-apigw:${IMAGE_TAG}
                         docker push ${DOCKER_REGISTRY}/service-cash:${IMAGE_TAG}
                         docker push ${DOCKER_REGISTRY}/service-transfer:${IMAGE_TAG}
                         docker push ${DOCKER_REGISTRY}/service-convert:${IMAGE_TAG}
@@ -246,7 +218,7 @@ pipeline {
                         --timeout=300s \\
                         --set service-accounts.image.repository=${DOCKER_REGISTRY}/service-accounts \\
                         --set service-accounts.image.tag=${IMAGE_TAG} \\
-                        --set service-gateway.image.repository=${DOCKER_REGISTRY}/service-gateway \\
+                        --set service-gateway.image.repository=${DOCKER_REGISTRY}/service-apigw \\
                         --set service-gateway.image.tag=${IMAGE_TAG} \\
                         --set service-cash.image.repository=${DOCKER_REGISTRY}/service-cash \\
                         --set service-cash.image.tag=${IMAGE_TAG} \\
