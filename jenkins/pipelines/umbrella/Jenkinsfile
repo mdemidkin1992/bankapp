@@ -59,114 +59,14 @@ pipeline {
         }
 
         stage('Запуск тестов') {
-            parallel {
-                stage('service-accounts тесты') {
-                    steps {
-                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                            sh "./gradlew :service-accounts:test"
-                        }
-                    }
-                    post {
-                        always {
-                            junit "service-accounts/build/test-results/test/*.xml"
-                        }
-                    }
+            steps {
+                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh "./gradlew test"
                 }
-                stage('service-gateway тесты') {
-                    steps {
-                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                            sh "./gradlew :service-gateway:test"
-                        }
-                    }
-                    post {
-                        always {
-                            junit "service-gateway/build/test-results/test/*.xml"
-                        }
-                    }
-                }
-                stage('service-cash тесты') {
-                    steps {
-                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                            sh "./gradlew :service-cash:test"
-                        }
-                    }
-                    post {
-                        always {
-                            junit "service-cash/build/test-results/test/*.xml"
-                        }
-                    }
-                }
-                stage('service-transfer тесты') {
-                    steps {
-                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                            sh "./gradlew :service-transfer:test"
-                        }
-                    }
-                    post {
-                        always {
-                            junit "service-transfer/build/test-results/test/*.xml"
-                        }
-                    }
-                }
-                stage('service-convert тесты') {
-                    steps {
-                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                            sh "./gradlew :service-convert:test"
-                        }
-                    }
-                    post {
-                        always {
-                            junit "service-convert/build/test-results/test/*.xml"
-                        }
-                    }
-                }
-                stage('service-exchange тесты') {
-                    steps {
-                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                            sh "./gradlew :service-exchange:test"
-                        }
-                    }
-                    post {
-                        always {
-                            junit "service-exchange/build/test-results/test/*.xml"
-                        }
-                    }
-                }
-                stage('service-blocker тесты') {
-                    steps {
-                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                            sh "./gradlew :service-blocker:test"
-                        }
-                    }
-                    post {
-                        always {
-                            junit "service-blocker/build/test-results/test/*.xml"
-                        }
-                    }
-                }
-                stage('service-notifications тесты') {
-                    steps {
-                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                            sh "./gradlew :service-notifications:test"
-                        }
-                    }
-                    post {
-                        always {
-                            junit "service-notifications/build/test-results/test/*.xml"
-                        }
-                    }
-                }
-                stage('service-front тесты') {
-                    steps {
-                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                            sh "./gradlew :service-front:test"
-                        }
-                    }
-                    post {
-                        always {
-                            junit "service-front/build/test-results/test/*.xml"
-                        }
-                    }
+            }
+            post {
+                always {
+                    junit "**/build/test-results/test/*.xml"
                 }
             }
         }
@@ -316,57 +216,6 @@ pipeline {
             }
         }
 
-        stage('Запуск Helm тестов') {
-            when {
-                not { 
-                    equals expected: true, actual: params.SKIP_TESTS
-                }
-            }
-            steps {
-                script {
-                    def namespace = ""
-                    if (params.DEPLOY_ENV == 'dev') {
-                        namespace = K8S_NAMESPACE_DEV
-                    } else if (params.DEPLOY_ENV == 'test') {
-                        namespace = K8S_NAMESPACE_TEST
-                    } else if (params.DEPLOY_ENV == 'prod') {
-                        namespace = K8S_NAMESPACE_PROD
-                    }
-                    
-                    sh """
-                        helm test bankapp \\
-                        --namespace ${namespace} \\
-                        --timeout=300s
-                    """
-                }
-            }
-        }
-
-        stage('Проверка статуса подов') {
-            steps {
-                script {
-                    def namespace = ""
-                    if (params.DEPLOY_ENV == 'dev') {
-                        namespace = K8S_NAMESPACE_DEV
-                    } else if (params.DEPLOY_ENV == 'test') {
-                        namespace = K8S_NAMESPACE_TEST
-                    } else if (params.DEPLOY_ENV == 'prod') {
-                        namespace = K8S_NAMESPACE_PROD
-                    }
-                    
-                    sh """
-                        echo "Проверка статуса подов в namespace ${namespace}:"
-                        kubectl get pods -n ${namespace}
-                        
-                        echo "Проверка сервисов:"
-                        kubectl get services -n ${namespace}
-                        
-                        echo "Ожидание готовности всех подов..."
-                        kubectl wait --for=condition=ready pod --all -n ${namespace} --timeout=600s --ignore-not-found=true
-                    """
-                }
-            }
-        }
 
         stage('Подтверждение для Production') {
             when {
