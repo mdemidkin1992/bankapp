@@ -1,0 +1,6 @@
+apiVersion: v2
+name: postgresql-exchange
+description: PostgreSQL database for exchange service
+type: application
+version: 0.1.0
+appVersion: "16.1"

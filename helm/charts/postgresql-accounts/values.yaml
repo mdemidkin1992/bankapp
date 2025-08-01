@@ -1,0 +1,26 @@
+postgresql:
+  image:
+    repository: postgres
+    tag: "16.1-alpine"
+    pullPolicy: IfNotPresent
+  
+  database: accounts-db
+  username: postgres
+  password: postgres
+  
+  persistence:
+    enabled: true
+    storageClass: ""
+    size: 8Gi
+    
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+service:
+  type: ClusterIP
+  port: 5432

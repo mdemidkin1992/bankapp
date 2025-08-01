@@ -1,0 +1,11 @@
+{{- if .Values.keycloak.realmImport.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "keycloak.fullname" . }}-realm-import
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+data:
+  realm-export.json: |
+{{ .Files.Get "files/realm-export.json" | indent 4 }}
+{{- end }}

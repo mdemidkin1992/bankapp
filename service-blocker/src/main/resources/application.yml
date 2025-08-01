@@ -1,9 +1,42 @@
+server:
+  port: 8083
+
 spring:
 
   # Service Discovery
   application:
     name: service-blocker
 
-  # Config Server
-  config:
-    import: configserver:${CONFIG_SERVER_URL:http://127.0.0.1:8888}
+  main:
+    allow-bean-definition-overriding: true # убрать после dev
+
+  # Cloud
+  cloud:
+
+  # Security
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8180/realms/bankapp/protocol/openid-connect/certs
+
+headers:
+  user-header: X-User-Login
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    web: info
+    org.springframework.security: info
+
+services:
+  service-gateway:
+    name: "bankapp-service-gateway:8080"

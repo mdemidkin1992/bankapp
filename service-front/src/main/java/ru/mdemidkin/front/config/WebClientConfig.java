@@ -1,7 +1,6 @@
 package ru.mdemidkin.front.config;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.client.ReactiveOAuth2AuthorizedClientManager;
@@ -15,14 +14,13 @@ public class WebClientConfig {
     private String keycloakClient;
 
     @Bean
-    @LoadBalanced
     public WebClient.Builder webClientBuilder() {
         return WebClient.builder();
     }
 
     @Bean
     public WebClient webClient(
-            @LoadBalanced WebClient.Builder webClientBuilder,
+            WebClient.Builder webClientBuilder,
             ReactiveOAuth2AuthorizedClientManager authorizedClientManager
     ) {
         ServerOAuth2AuthorizedClientExchangeFilterFunction oauth2Client =

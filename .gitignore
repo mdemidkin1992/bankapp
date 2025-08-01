@@ -35,3 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### ENV
+jenkins/.env
+jenkins_kubeconfig.yaml

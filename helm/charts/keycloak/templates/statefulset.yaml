@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "keycloak.fullname" . }}
+  labels:
+    {{- include "keycloak.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "keycloak.fullname" . }}
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "keycloak.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "keycloak.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: keycloak
+          image: "{{ .Values.keycloak.image.repository }}:{{ .Values.keycloak.image.tag }}"
+          imagePullPolicy: {{ .Values.keycloak.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: KC_HOSTNAME
+              value: {{ .Values.keycloak.hostname }}
+            - name: KC_HOSTNAME_PORT
+              value: "{{ .Values.keycloak.hostnamePort }}"
+            - name: KEYCLOAK_ADMIN
+              value: {{ .Values.keycloak.admin.username }}
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: {{ .Values.keycloak.admin.password }}
+            # Database configuration removed - using development mode with in-memory H2
+          {{- if .Values.keycloak.realmImport.enabled }}
+          command:
+            - sh
+            - -c
+            - |
+              /opt/keycloak/bin/kc.sh start-dev --import-realm
+          {{- else }}
+          command:
+            - sh
+            - -c
+            - |
+              /opt/keycloak/bin/kc.sh start-dev
+          {{- end }}
+          volumeMounts:
+            {{- if .Values.keycloak.realmImport.enabled }}
+            - name: realm-import
+              mountPath: /opt/keycloak/data/import
+              readOnly: true
+            {{- end }}
+            {{- if .Values.keycloak.persistence.enabled }}
+            - name: keycloak-data
+              mountPath: /opt/keycloak/data
+            {{- end }}
+          resources:
+            {{- toYaml .Values.keycloak.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+      volumes:
+        {{- if .Values.keycloak.realmImport.enabled }}
+        - name: realm-import
+          configMap:
+            name: {{ include "keycloak.fullname" . }}-realm-import
+        {{- end }}
+        {{- if not .Values.keycloak.persistence.enabled }}
+        - name: keycloak-data
+          emptyDir: {}
+        {{- end }}
+  {{- if .Values.keycloak.persistence.enabled }}
+  volumeClaimTemplates:
+    - metadata:
+        name: keycloak-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        {{- if .Values.keycloak.persistence.storageClass }}
+        storageClassName: {{ .Values.keycloak.persistence.storageClass }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.keycloak.persistence.size }}
+  {{- end }}

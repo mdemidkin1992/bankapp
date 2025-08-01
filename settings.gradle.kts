@@ -1,7 +1,6 @@
 rootProject.name = "bankapp"
 
 include(
-    "config-server",
     "service-gateway",
     "service-accounts",
     "service-exchange",
