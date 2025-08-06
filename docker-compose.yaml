@@ -51,6 +51,33 @@ services:
     networks:
       - app_network
 
+  # -------- Messaging -------- #
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - app_network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+    networks:
+      - app_network
+
   # -------- Services -------- #
   service-front-app:
     image: service-front-app:latest
@@ -96,6 +123,7 @@ services:
       context: .
       dockerfile: service-transfer/Dockerfile
     environment:
+      KAFKA_BROKERS: kafka:29092
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
       SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_AUTHORIZATION_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/auth
       SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKEN_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/token
@@ -166,6 +194,7 @@ services:
       context: .
       dockerfile: service-cash/Dockerfile
     environment:
+      KAFKA_BROKERS: kafka:29092
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
       SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_AUTHORIZATION_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/auth
       SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKEN_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/token
@@ -185,6 +214,7 @@ services:
       context: .
       dockerfile: service-notifications/Dockerfile
     environment:
+      KAFKA_BROKERS: kafka:29092
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/bankapp/protocol/openid-connect/certs
       SPRING_R2DBC_URL: r2dbc:postgresql://notifications-postgres:5432/notifications-db
       SPRING_R2DBC_USERNAME: postgres

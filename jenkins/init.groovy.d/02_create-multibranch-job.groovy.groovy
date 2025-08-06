@@ -1,6 +1,6 @@
+import jenkins.branch.*
 import jenkins.model.*
 import org.jenkinsci.plugins.github_branch_source.*
-import jenkins.branch.*
 import org.jenkinsci.plugins.workflow.multibranch.*
 
 def env = System.getenv()
