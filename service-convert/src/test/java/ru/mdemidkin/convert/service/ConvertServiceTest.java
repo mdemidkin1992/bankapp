@@ -5,12 +5,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import reactor.core.publisher.Flux;
-import ru.mdemidkin.convert.client.ExchangeClient;
-import ru.mdemidkin.libdto.account.CurrencyDto;
+import ru.mdemidkin.convert.listener.ExchangeRateListener;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -19,34 +17,30 @@ import static org.mockito.Mockito.when;
 class ConvertServiceTest {
 
     @Mock
-    private ExchangeClient exchangeClient;
+    private ExchangeRateListener listener;
 
     @InjectMocks
     private ConvertService convertService;
 
     @Test
     void convertAmount_calculatesCorrectConversion() {
-        List<CurrencyDto> currencies = List.of(
-                new CurrencyDto("USD", "USD", new BigDecimal("1.2")),
-                new CurrencyDto("EUR", "EUR", new BigDecimal("0.8"))
-        );
-        when(exchangeClient.getCurrencies()).thenReturn(Flux.fromIterable(currencies));
+        when(listener.getRate("USD")).thenReturn(Optional.of(new BigDecimal("1.2")));
+        when(listener.getRate("EUR")).thenReturn(Optional.of(new BigDecimal("0.8")));
+        
         BigDecimal result = convertService
                 .convertAmount("USD", "EUR", new BigDecimal("100"))
                 .block();
-        assertEquals(new BigDecimal("150.0"), result);
+        assertEquals(0, new BigDecimal("150.0").compareTo(result));
     }
 
     @Test
     void convertAmount_appliesHalfUpRounding() {
-        List<CurrencyDto> currencies = List.of(
-                new CurrencyDto("AAA", "AAA", new BigDecimal("1")),
-                new CurrencyDto("BBB", "BBB", new BigDecimal("3"))
-        );
-        when(exchangeClient.getCurrencies()).thenReturn(Flux.fromIterable(currencies));
+        when(listener.getRate("AAA")).thenReturn(Optional.of(new BigDecimal("1")));
+        when(listener.getRate("BBB")).thenReturn(Optional.of(new BigDecimal("3")));
+        
         BigDecimal result = convertService
                 .convertAmount("AAA", "BBB", new BigDecimal("100"))
                 .block();
-        assertEquals(new BigDecimal("33"), result);
+        assertEquals(0, new BigDecimal("33").compareTo(result));
     }
 }

@@ -4,38 +4,30 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-import ru.mdemidkin.convert.client.ExchangeClient;
-import ru.mdemidkin.libdto.account.CurrencyDto;
+import ru.mdemidkin.convert.listener.ExchangeRateListener;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ConvertService {
 
-    private final ExchangeClient exchangeClient;
+    private final ExchangeRateListener listener;
 
     public Mono<BigDecimal> convertAmount(String fromCurrency,
                                           String toCurrency,
                                           BigDecimal value) {
-        return exchangeClient.getCurrencies()
-                .collectList()
-                .flatMap(list -> {
-                    Map<String, BigDecimal> currencyMap = list.stream()
-                            .collect(Collectors.toMap(
-                                    CurrencyDto::getTitle,
-                                    CurrencyDto::getValue));
+        return Mono.fromSupplier(() -> {
+            BigDecimal fromRate = getCurrencyRate(fromCurrency);
+            BigDecimal toRate = getCurrencyRate(toCurrency);
+            return value.multiply(fromRate).divide(toRate, RoundingMode.HALF_UP);
+        });
+    }
 
-                    BigDecimal fromRate = currencyMap.get(fromCurrency);
-                    BigDecimal toRate = currencyMap.get(toCurrency);
-
-                    return Mono.just(value
-                            .multiply(fromRate)
-                            .divide(toRate, RoundingMode.HALF_UP));
-                });
+    private BigDecimal getCurrencyRate(String currency) {
+        return listener.getRate(currency)
+                .orElseThrow(() -> new IllegalArgumentException("Курс валюты " + currency + " не найден"));
     }
 }

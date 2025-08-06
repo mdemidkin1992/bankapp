@@ -36,7 +36,7 @@ class CustomReactiveUserDetailsServiceTest {
     private CustomReactiveUserDetailsService userDetailsService;
 
     private static final String URL_TEMPLATE =
-            "http://service-accounts/auth/users/{username}";
+            "http://bankapp-service-accounts:8084/auth/users/{username}";
 
     @BeforeEach
     void setUp() {
