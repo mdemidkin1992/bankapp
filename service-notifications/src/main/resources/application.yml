@@ -31,6 +31,25 @@ spring:
     username: postgres
     password: postgres
 
+  # Kafka
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKERS:kafka:29092}
+    consumer:
+      enable-auto-commit: false
+      auto-offset-reset: earliest
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.trusted.packages: ru.mdemidkin.*
+        allow.auto.create.topics: true
+    listener:
+      ack-mode: ${KAFKA_ACK_MODE:record}
+
+kafka-topics:
+  notifications-topic: topic-bankapp-notifications
+
 headers:
   user-header: X-User-Login
 
