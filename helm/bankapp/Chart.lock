@@ -42,4 +42,4 @@ dependencies:
   repository: file://../charts/service-notifications
   version: 0.1.0
 digest: sha256:5da520bf2383ae0626b79565b6984742367be61b01d954d502ca964e0c3f6a99
-generated: "2025-08-07T16:52:39.14068+02:00"
+generated: "2025-08-07T21:19:40.699122+02:00"
