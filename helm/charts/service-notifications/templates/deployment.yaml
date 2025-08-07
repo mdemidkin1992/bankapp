@@ -38,7 +38,7 @@ spec:
           command: ['sh', '-c']
           args:
             - |
-              until nc -z {{ .Values.kafka.serviceName | default "bankapp-kafka" }} {{ .Values.kafka.port | default "9092" }}; do
+              until nc -z bankapp-kafka 9092; do
                 echo "Waiting for Kafka to be ready..."
                 sleep 5
               done
