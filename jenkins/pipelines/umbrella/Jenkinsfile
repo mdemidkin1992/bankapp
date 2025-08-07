@@ -220,7 +220,7 @@ pipeline {
                         --namespace ${namespace} \\
                         --create-namespace \\
                         --timeout=600s \\
-                        --set kafka.enabled=true \\
+                        --wait \\
                         --set service-accounts.image.repository=${DOCKER_REGISTRY}/service-accounts \\
                         --set service-accounts.image.tag=${IMAGE_TAG} \\
                         --set service-gateway.image.repository=${DOCKER_REGISTRY}/service-apigw \\
