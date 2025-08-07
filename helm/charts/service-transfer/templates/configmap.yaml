@@ -12,3 +12,6 @@ data:
   oauth2-client-provider-jwk-set-uri: "http://bankapp-keycloak:8080/realms/bankapp/protocol/openid-connect/certs"
   oauth2-client-id: "bankapp-client"
   oauth2-client-provider: "keycloak"
+  
+  # Kafka Configuration
+  kafka-brokers: "kafka:9092"

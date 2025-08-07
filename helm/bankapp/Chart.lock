@@ -1,4 +1,7 @@
 dependencies:
+- name: kafka
+  repository: https://charts.bitnami.com/bitnami
+  version: 24.0.10
 - name: keycloak
   repository: file://../charts/keycloak
   version: 0.1.0
@@ -38,5 +41,5 @@ dependencies:
 - name: service-notifications
   repository: file://../charts/service-notifications
   version: 0.1.0
-digest: sha256:72aad889021d6aa1d4c53c4de17ef0f10f668a702a5bebd59b0a768bab27c91a
-generated: "2025-07-27T17:09:40.511321+02:00"
+digest: sha256:5da520bf2383ae0626b79565b6984742367be61b01d954d502ca964e0c3f6a99
+generated: "2025-08-07T16:52:39.14068+02:00"

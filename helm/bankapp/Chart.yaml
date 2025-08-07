@@ -20,6 +20,11 @@ appVersion: "1.0.0"
 
 dependencies:
   # Infrastructure Dependencies
+  - name: kafka
+    version: "24.0.10"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: kafka.enabled
+  
   - name: keycloak
     version: "0.1.0"
     repository: "file://../charts/keycloak"
