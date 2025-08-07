@@ -11,3 +11,7 @@ data:
   # Database Configuration
   r2dbc-url: "r2dbc:postgresql://bankapp-postgresql-notifications:5432/notifications-db"
   r2dbc-username: "postgres"
+  
+  # Kafka Configuration
+  kafka-brokers: "bankapp-kafka:9092"
+  kafka-topics.notifications-topic: "topic-bankapp-notifications"

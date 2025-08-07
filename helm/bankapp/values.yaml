@@ -7,6 +7,42 @@ global:
   environment: development
 
 # Infrastructure Dependencies
+kafka:
+  enabled: true
+  replicaCount: 1
+  kraft:
+    enabled: true
+  controller:
+    replicaCount: 1
+  listeners:
+    client:
+      protocol: PLAINTEXT
+      port: 9092
+    external:
+      protocol: PLAINTEXT
+      port: 9094
+    advertisedListeners: "CLIENT://bankapp-kafka:9092,INTERNAL://bankapp-kafka:9094"
+  service:
+    type: ClusterIP
+    ports:
+      client: 9092
+  persistence:
+    enabled: false
+  zookeeper:
+    enabled: false
+  auth:
+    clientProtocol: plaintext
+    interBrokerProtocol: plaintext
+    sasl:
+      enabledMechanisms: ""
+      interBrokerMechanism: ""
+  extraConfig: |
+    offsets.topic.replication.factor=1
+    transaction.state.log.replication.factor=1
+    transaction.state.log.min.isr=1
+    default.replication.factor=1
+    min.insync.replicas=1
+
 keycloak:
   enabled: true
   keycloak:

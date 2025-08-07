@@ -19,10 +19,23 @@ for ns in bankapp-dev bankapp-test bankapp-prod; do
   helm uninstall bankapp -n "$ns" || true
 done
 
-echo "Deleting PVCs and PVs..."
+echo "Force deleting remaining resources..."
 for ns in bankapp-dev bankapp-test bankapp-prod; do
+  # Принудительное удаление pods, statefulsets, deployments
+  kubectl delete pods --all -n "$ns" --grace-period=0 --force || true
+  kubectl delete statefulsets --all -n "$ns" --grace-period=0 --force || true
+  kubectl delete deployments --all -n "$ns" --grace-period=0 --force || true
+  
+  # Удаление PVCs
   kubectl delete pvc --all -n "$ns" --ignore-not-found || true
+  
+  # Удаление services и configmaps
+  kubectl delete svc --all -n "$ns" --ignore-not-found || true
+  kubectl delete configmaps --all -n "$ns" --ignore-not-found || true
+  kubectl delete secrets --all -n "$ns" --ignore-not-found || true
 done
+
+echo "Deleting PVs..."
 kubectl delete pv --all || true
 
 echo "Deleting namespaces..."

@@ -7,7 +7,7 @@
     <script language="JavaScript">
         setInterval(() => {
             var td = document.getElementById('exchange_rates');
-            fetch('http://localhost:8080/api/rates', {
+            fetch('/api/rates', {
                 credentials: 'include'
             })
                 .then(response => response.json())
@@ -32,7 +32,7 @@
             var notificationsDiv = document.getElementById('notifications');
             var login = '[[${login}]]';
 
-            fetch(`http://localhost:8080/api/${login}/notifications`, {
+            fetch(`/api/${login}/notifications`, {
                 credentials: 'include'
             })
                 .then(response => response.json())
