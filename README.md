@@ -60,6 +60,7 @@ bankapp/
 - Spring Security (аутентификация и авторизация)
 - OAuth2 / Keycloak (межсервисная аутентификация)
 - Apache Zookeeper (Service Discovery)
+- Apache Kafka (Message Broker)
 - Resilience4j (Circuit Breaker, Retry)
 - PostgreSQL (база данных)
 - Docker & Docker Compose
@@ -132,6 +133,46 @@ resilience4j:
       default:
         failure-rate-threshold: 50
         wait-duration-in-open-state: 10s
+```
+
+## Apache Kafka
+
+### Топики и стратегии доставки
+
+**topic-bankapp-notifications**:
+- Производители: `service-cash`, `service-transfer`
+- Потребитель: `service-notifications`
+- Стратегия: At Least Once delivery 
+- Порядок сообщений: не гарантируется (unordered messages)
+- Обработка: потребитель возобновляет с последнего прочитанного offset
+
+**topic-bankapp-exchange**:
+- Производитель: `service-exchange` (генератор курсов)
+- Потребитель: `service-сonvert` (обновление курсов)
+- Стратегия: At Most Once delivery
+- Порядок сообщений: строго упорядочен (ordered messages)
+- Обработка: потребитель может пропустить устаревшие сообщения
+
+### Kubernetes конфигурация
+
+Kafka развернута через Bitnami Helm chart с настройками для single-node кластера:
+
+```yaml
+kafka:
+  replicaCount: 1
+  kraft:
+    enabled: true
+  controller:
+    replicaCount: 1
+  listeners:
+    client:
+      protocol: PLAINTEXT
+      port: 9092
+  extraConfig: |
+    offsets.topic.replication.factor=1
+    transaction.state.log.replication.factor=1
+    default.replication.factor=1
+    min.insync.replicas=1
 ```
 
 ## Spring Cloud Config Server
