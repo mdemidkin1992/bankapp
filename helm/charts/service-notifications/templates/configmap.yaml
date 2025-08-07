@@ -14,3 +14,4 @@ data:
   
   # Kafka Configuration
   kafka-brokers: "bankapp-kafka:9092"
+  kafka-topics.notifications-topic: "topic-bankapp-notifications"

@@ -32,6 +32,17 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      initContainers:
+        - name: wait-for-kafka
+          image: busybox:1.35
+          command: ['sh', '-c']
+          args:
+            - |
+              until nc -z {{ .Values.kafka.serviceName | default "bankapp-kafka" }} {{ .Values.kafka.port | default "9092" }}; do
+                echo "Waiting for Kafka to be ready..."
+                sleep 5
+              done
+              echo "Kafka is ready!"
       containers:
         - name: {{ .Chart.Name }}
           {{- with .Values.securityContext }}
@@ -73,6 +84,11 @@ spec:
                 configMapKeyRef:
                   name: {{ include "service-notifications.fullname" . }}-config
                   key: kafka-brokers
+            - name: KAFKA_TOPICS_NOTIFICATIONS_TOPIC
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "service-notifications.fullname" . }}-config
+                  key: kafka-topics.notifications-topic
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
