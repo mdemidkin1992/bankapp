@@ -14,4 +14,4 @@ data:
   oauth2-client-provider: "keycloak"
   
   # Kafka Configuration
-  kafka-brokers: "kafka:9092"
+  kafka-brokers: "bankapp-kafka:9092"
