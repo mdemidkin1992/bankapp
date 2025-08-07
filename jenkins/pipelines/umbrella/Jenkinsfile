@@ -165,7 +165,11 @@ pipeline {
 
         stage('Подготовка Helm зависимостей') {
             steps {
-                sh "helm dependency build ./helm/bankapp"
+                sh """
+                    helm repo add bitnami https://charts.bitnami.com/bitnami || true
+                    helm repo update
+                    helm dependency build ./helm/bankapp
+                """
             }
         }
 
@@ -190,7 +194,7 @@ pipeline {
             }
         }
 
-        stage('Деплой Dev') {
+        stage('Деплой') {
             when {
                 anyOf {
                     expression { params.DEPLOY_ENV == 'dev' }
@@ -215,7 +219,8 @@ pipeline {
                         helm upgrade --install bankapp ./helm/bankapp \\
                         --namespace ${namespace} \\
                         --create-namespace \\
-                        --timeout=300s \\
+                        --timeout=600s \\
+                        --set kafka.enabled=true \\
                         --set service-accounts.image.repository=${DOCKER_REGISTRY}/service-accounts \\
                         --set service-accounts.image.tag=${IMAGE_TAG} \\
                         --set service-gateway.image.repository=${DOCKER_REGISTRY}/service-apigw \\
@@ -234,6 +239,44 @@ pipeline {
                         --set service-notifications.image.tag=${IMAGE_TAG} \\
                         --set service-front.image.repository=${DOCKER_REGISTRY}/service-front \\
                         --set service-front.image.tag=${IMAGE_TAG}
+                    """
+                }
+            }
+        }
+        
+        stage('Проверка готовности Kafka') {
+            when {
+                anyOf {
+                    expression { params.DEPLOY_ENV == 'dev' }
+                    expression { params.DEPLOY_ENV == 'test' }
+                    expression { params.DEPLOY_ENV == 'prod' }
+                }
+            }
+            steps {
+                script {
+                    def namespace = ""
+                    if (params.DEPLOY_ENV == 'dev') {
+                        namespace = K8S_NAMESPACE_DEV
+                    } else if (params.DEPLOY_ENV == 'test') {
+                        namespace = K8S_NAMESPACE_TEST
+                    } else if (params.DEPLOY_ENV == 'prod') {
+                        namespace = K8S_NAMESPACE_PROD
+                    }
+                    
+                    echo "Ожидание готовности Kafka в ${namespace}..."
+                    
+                    sh """
+                        # Ожидаем готовности Kafka pod
+                        kubectl wait --for=condition=Ready pod -l app.kubernetes.io/name=kafka \\
+                            -n ${namespace} --timeout=300s || true
+                        
+                        # Проверяем статус Kafka
+                        echo "Статус Kafka pods:"
+                        kubectl get pods -l app.kubernetes.io/name=kafka -n ${namespace} || true
+                        
+                        # Проверяем Kafka service
+                        echo "Kafka services:"
+                        kubectl get svc -l app.kubernetes.io/name=kafka -n ${namespace} || true
                     """
                 }
             }
@@ -275,7 +318,16 @@ pipeline {
                 }
                 
                 echo "Итоговый статус деплоя в ${params.DEPLOY_ENV}:"
-                sh "kubectl get pods -n ${namespace} || true"
+                sh """
+                    echo "=== ВСЕ PODS ==="
+                    kubectl get pods -n ${namespace} || true
+                    
+                    echo "=== KAFKA PODS ==="
+                    kubectl get pods -l app.kubernetes.io/name=kafka -n ${namespace} || true
+                    
+                    echo "=== SERVICES ==="
+                    kubectl get svc -n ${namespace} || true
+                """
             }
         }
         success {

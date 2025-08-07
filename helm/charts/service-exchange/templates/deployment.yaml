@@ -67,6 +67,12 @@ spec:
                 secretKeyRef:
                   name: {{ include "service-exchange.fullname" . }}-secret
                   key: db-password
+            # Kafka Configuration
+            - name: KAFKA_BROKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "service-exchange.fullname" . }}-config
+                  key: kafka-brokers
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}

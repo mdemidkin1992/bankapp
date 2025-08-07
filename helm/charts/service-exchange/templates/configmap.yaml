@@ -11,3 +11,6 @@ data:
   # Database Configuration
   r2dbc-url: "r2dbc:postgresql://bankapp-postgresql-exchange:5432/exchange-db"
   r2dbc-username: "postgres"
+  
+  # Kafka Configuration
+  kafka-brokers: "kafka:9092"

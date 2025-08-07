@@ -7,6 +7,29 @@ global:
   environment: development
 
 # Infrastructure Dependencies
+kafka:
+  enabled: true
+  replicaCount: 1
+  kraft:
+    enabled: true
+  controller:
+    replicaCount: 1
+  listeners:
+    client:
+      protocol: PLAINTEXT
+      port: 9092
+    external:
+      protocol: PLAINTEXT
+      port: 9094
+  service:
+    type: ClusterIP
+    ports:
+      client: 9092
+  persistence:
+    enabled: false
+  zookeeper:
+    enabled: false
+
 keycloak:
   enabled: true
   keycloak:
