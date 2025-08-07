@@ -29,6 +29,12 @@ kafka:
     enabled: false
   zookeeper:
     enabled: false
+  auth:
+    clientProtocol: plaintext
+    interBrokerProtocol: plaintext
+    sasl:
+      enabledMechanisms: ""
+      interBrokerMechanism: ""
 
 keycloak:
   enabled: true
