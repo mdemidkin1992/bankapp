@@ -3,8 +3,6 @@ package ru.mdemidkin.transfer.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -14,11 +12,12 @@ import reactor.core.publisher.Mono;
 import ru.mdemidkin.libdto.account.AccountDto;
 import ru.mdemidkin.libdto.cash.CashProcessResponse;
 import ru.mdemidkin.libdto.cash.CashRequest;
+import ru.mdemidkin.libdto.notification.NotificationDto;
 import ru.mdemidkin.libdto.transfer.TransferRequest;
 import ru.mdemidkin.transfer.client.AccountsClient;
 import ru.mdemidkin.transfer.client.BlockersClient;
 import ru.mdemidkin.transfer.client.ConvertClient;
-import ru.mdemidkin.transfer.client.NotificationsClient;
+import ru.mdemidkin.transfer.producer.NotificationsProducerService;
 
 import java.math.BigDecimal;
 import java.net.URI;
@@ -42,7 +41,7 @@ class TransferServiceTest {
     private BlockersClient blockersClient;
 
     @Mock
-    private NotificationsClient notificationsClient;
+    private NotificationsProducerService notificationsProducer;
 
     @Mock
     private ConvertClient convertClient;
@@ -50,8 +49,6 @@ class TransferServiceTest {
     @InjectMocks
     private TransferService transferService;
 
-    @Captor
-    private ArgumentCaptor<String> messageCaptor;
 
     private TransferRequest request;
     private String login;
@@ -65,8 +62,6 @@ class TransferServiceTest {
                 .value(new BigDecimal("100"))
                 .toLogin("bob")
                 .build();
-        when(notificationsClient.sendNotification(anyString(), anyString()))
-                .thenReturn(Mono.empty());
     }
 
     @Test
@@ -83,8 +78,7 @@ class TransferServiceTest {
         URI loc = resp.getHeaders().getLocation();
         assertNotNull(loc);
         assertTrue(loc.toString().contains("transferOtherErrors"));
-        verify(notificationsClient).sendNotification(eq(login), messageCaptor.capture());
-        assertTrue(messageCaptor.getValue().contains("Операция по переводу заблокирована:"));
+        verify(notificationsProducer).sendNotificationsMessage(eq(login), any(NotificationDto.class));
     }
 
     @Test
@@ -107,8 +101,7 @@ class TransferServiceTest {
         URI loc = resp.getHeaders().getLocation();
         assertNotNull(loc);
         assertTrue(loc.toString().contains("transferOtherErrors"));
-        verify(notificationsClient).sendNotification(eq(login), messageCaptor.capture());
-        assertTrue(messageCaptor.getValue().contains("Ошибка перевода: Один из счетов не найден"));
+        verify(notificationsProducer).sendNotificationsMessage(eq(login), any(NotificationDto.class));
     }
 
     @Test
@@ -137,8 +130,7 @@ class TransferServiceTest {
         URI loc = resp.getHeaders().getLocation();
         assertNotNull(loc);
         assertTrue(loc.toString().contains("transferErrors"));
-        verify(notificationsClient).sendNotification(eq(login), messageCaptor.capture());
-        assertTrue(messageCaptor.getValue().contains("Ошибка перевода: Недостаточно средств"));
+        verify(notificationsProducer).sendNotificationsMessage(eq(login), any(NotificationDto.class));
     }
 
     @Test
@@ -172,7 +164,6 @@ class TransferServiceTest {
 
         assertNotNull(resp);
         assertEquals(HttpStatus.FOUND, resp.getStatusCode());
-        verify(notificationsClient).sendNotification(eq(login), messageCaptor.capture());
-        assertTrue(messageCaptor.getValue().contains("Успешный перевод:"));
+        verify(notificationsProducer).sendNotificationsMessage(eq(login), any(NotificationDto.class));
     }
 }

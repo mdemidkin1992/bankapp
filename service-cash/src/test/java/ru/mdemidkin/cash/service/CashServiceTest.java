@@ -1,9 +1,7 @@
 package ru.mdemidkin.cash.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -11,9 +9,10 @@ import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
 import ru.mdemidkin.cash.client.AccountsClient;
 import ru.mdemidkin.cash.client.BlockersClient;
-import ru.mdemidkin.cash.client.NotificationsClient;
+import ru.mdemidkin.cash.producer.NotificationsProducerService;
 import ru.mdemidkin.libdto.cash.CashProcessResponse;
 import ru.mdemidkin.libdto.cash.CashRequest;
+import ru.mdemidkin.libdto.notification.NotificationDto;
 
 import java.net.URI;
 import java.util.List;
@@ -22,8 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.when;
@@ -38,7 +37,7 @@ class CashServiceTest {
     private BlockersClient blockersClient;
 
     @Mock
-    private NotificationsClient notificationsClient;
+    private NotificationsProducerService notificationsProducer;
 
     @InjectMocks
     private CashService cashService;
@@ -48,12 +47,6 @@ class CashServiceTest {
             .value("100.00")
             .action(ru.mdemidkin.libdto.cash.CashAction.PUT)
             .build();
-
-    @BeforeEach
-    void setUp() {
-        when(notificationsClient.sendNotification(anyString(), anyString()))
-                .thenReturn(Mono.empty());
-    }
 
     @Test
     void updateCashBalance_notBlocked_completed() {
@@ -75,12 +68,7 @@ class CashServiceTest {
         assertEquals("/", location.getPath());
         assertNull(location.getQuery(), "No errors expected on successful update");
 
-        ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-        then(notificationsClient).should().sendNotification(eq("user1"), msgCaptor.capture());
-        String sentMsg = msgCaptor.getValue();
-        assertTrue(sentMsg.contains("Успешное пополнение счета:"));
-        assertTrue(sentMsg.contains("USD"));
-        assertTrue(sentMsg.contains("100.00"));
+        then(notificationsProducer).should().sendNotificationsMessage(eq("user1"), any(NotificationDto.class));
     }
 
     @Test
@@ -105,10 +93,7 @@ class CashServiceTest {
         assertEquals("/", loc.getPath());
         assertEquals("cashErrors=err1&cashErrors=err2", loc.getQuery());
 
-        ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
-        then(notificationsClient).should().sendNotification(eq("user1"), msgCaptor.capture());
-        String sentMsg = msgCaptor.getValue();
-        assertTrue(sentMsg.contains("Ошибка пополнения счета:"));
+        then(notificationsProducer).should().sendNotificationsMessage(eq("user1"), any(NotificationDto.class));
     }
 
     @Test
@@ -125,6 +110,6 @@ class CashServiceTest {
         assertEquals("/", loc.getPath());
         assertTrue(loc.getQuery().contains("Операция по пополнению счета заблокирована:"));
 
-        then(notificationsClient).should().sendNotification(eq("user1"), contains("Операция по пополнению счета заблокирована:"));
+        then(notificationsProducer).should().sendNotificationsMessage(eq("user1"), any(NotificationDto.class));
     }
 }

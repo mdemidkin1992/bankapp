@@ -11,14 +11,15 @@ import reactor.core.publisher.Mono;
 import ru.mdemidkin.libdto.account.AccountDto;
 import ru.mdemidkin.libdto.cash.CashAction;
 import ru.mdemidkin.libdto.cash.CashRequest;
+import ru.mdemidkin.libdto.notification.NotificationDto;
 import ru.mdemidkin.libdto.transfer.TransferRequest;
 import ru.mdemidkin.transfer.client.AccountsClient;
 import ru.mdemidkin.transfer.client.BlockersClient;
 import ru.mdemidkin.transfer.client.ConvertClient;
-import ru.mdemidkin.transfer.client.NotificationsClient;
 import ru.mdemidkin.transfer.exception.AccountNotFoundException;
 import ru.mdemidkin.transfer.exception.InsufficientFundsException;
 import ru.mdemidkin.transfer.exception.TransferException;
+import ru.mdemidkin.transfer.producer.NotificationsProducerService;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -33,8 +34,8 @@ public class TransferService {
 
     private final AccountsClient accountsClient;
     private final BlockersClient blockersClient;
-    private final NotificationsClient notificationsClient;
     private final ConvertClient convertClient;
+    private final NotificationsProducerService notificationsProducer;
 
     private static final String SUCCESS_MESSAGE = "Успешный перевод:";
     private static final String FAIL_MESSAGE = "Ошибка перевода:";
@@ -50,7 +51,8 @@ public class TransferService {
         return blockersClient.sendBlockerRequest(timestamp)
                 .flatMap(blocked -> {
                     if (blocked) {
-                        notificationsClient.sendNotification(login, formatMessage(BLOCKED_MESSAGE, transferRequest)).subscribe();
+                        notificationsProducer.sendNotificationsMessage(login, new NotificationDto(login, formatMessage(BLOCKED_MESSAGE, transferRequest)));
+
                         addErrors(BLOCKED_MESSAGE, login, transferRequest.getToLogin(), transferErrors, transferOtherErrors);
                         return redirectToMain(transferErrors, transferOtherErrors);
                     }
@@ -112,12 +114,12 @@ public class TransferService {
                                         })
                                         .doOnSuccess(v -> {
                                             String message = formatMessage(SUCCESS_MESSAGE, transferRequest);
-                                            notificationsClient.sendNotification(login, message).subscribe();
+                                            notificationsProducer.sendNotificationsMessage(login, new NotificationDto(login, message));
                                         });
                             })
                             .onErrorResume(ex -> {
                                 String errorMessage = formatMessage("Ошибка перевода: " + ex.getMessage(), transferRequest);
-                                notificationsClient.sendNotification(login, errorMessage).subscribe();
+                                notificationsProducer.sendNotificationsMessage(login, new NotificationDto(login, errorMessage));
                                 return redirectToMain(transferErrors, transferOtherErrors);
                             });
                 });
