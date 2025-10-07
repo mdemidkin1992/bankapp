@@ -49,6 +49,10 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       acks: all
+    template:
+      observation-enabled: true
+    listener:
+      observation-enabled: true
 
 kafka-topics:
   notifications-topic: topic-bankapp-notifications
@@ -70,6 +74,12 @@ headers:
   user-header: X-User-Login
 
 management:
+  zipkin:
+    tracing:
+      endpoint: ${MANAGEMENT_ZIPKIN_TRACING_ENDPOINT:http://localhost:9411/api/v2/spans}
+  tracing:
+    sampling:
+      probability: 1
   endpoints:
     web:
       exposure:

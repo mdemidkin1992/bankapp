@@ -16,3 +16,6 @@ data:
   # Database Configuration
   r2dbc-url: "r2dbc:postgresql://bankapp-postgresql-accounts:5432/accounts-db"
   r2dbc-username: "postgres"
+
+  # Zipkin Configuration
+  zipkin-tracing-endpoint: "http://zipkin.monitoring.svc.cluster.local:9411/api/v2/spans"

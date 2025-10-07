@@ -78,6 +78,11 @@ spec:
                 secretKeyRef:
                   name: {{ include "service-notifications.fullname" . }}-secret
                   key: db-password
+            - name: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "service-notifications.fullname" . }}-config
+                  key: zipkin-tracing-endpoint
             # Kafka Configuration
             - name: KAFKA_BROKERS
               valueFrom:

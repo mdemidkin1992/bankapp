@@ -40,6 +40,10 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       acks: 0
       retries: 0
+    template:
+      observation-enabled: true
+    listener:
+      observation-enabled: true
 
 kafka-topics:
   exchange-rates-topic: topic-bankapp-exchange-rates
@@ -48,6 +52,12 @@ headers:
   user-header: X-User-Login
 
 management:
+  zipkin:
+    tracing:
+      endpoint: ${MANAGEMENT_ZIPKIN_TRACING_ENDPOINT:http://localhost:9411/api/v2/spans}
+  tracing:
+    sampling:
+      probability: 1
   endpoints:
     web:
       exposure:

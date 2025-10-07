@@ -98,6 +98,11 @@ spec:
                 secretKeyRef:
                   name: {{ include "service-accounts.fullname" . }}-secret
                   key: db-password
+            - name: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "service-accounts.fullname" . }}-config
+                  key: zipkin-tracing-endpoint
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}

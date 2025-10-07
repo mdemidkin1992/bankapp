@@ -82,6 +82,11 @@ spec:
                 secretKeyRef:
                   name: {{ include "service-cash.fullname" . }}-secret
                   key: client-secret
+            - name: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "service-cash.fullname" . }}-config
+                  key: zipkin-tracing-endpoint
             # Kafka Configuration
             - name: KAFKA_BROKERS
               valueFrom:

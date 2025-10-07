@@ -34,6 +34,8 @@ dependencies {
     implementation("io.github.daggerok:liquibase-r2dbc-spring-boot-starter:3.1.3")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
+    implementation("io.micrometer:micrometer-tracing-bridge-brave")
+    implementation("io.zipkin.reporter2:zipkin-reporter-brave")
 
     implementation(project(":common-dto"))
 

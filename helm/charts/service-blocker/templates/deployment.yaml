@@ -51,6 +51,11 @@ spec:
                 configMapKeyRef:
                   name: {{ include "service-blocker.fullname" . }}-config
                   key: oauth2-resource-server-jwk-set-uri
+            - name: MANAGEMENT_ZIPKIN_TRACING_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "service-blocker.fullname" . }}-config
+                  key: zipkin-tracing-endpoint
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}

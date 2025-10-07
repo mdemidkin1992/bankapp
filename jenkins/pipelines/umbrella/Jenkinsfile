@@ -194,6 +194,26 @@ pipeline {
             }
         }
 
+        stage('Деплой мониторинг окружения') {
+            when {
+                anyOf {
+                    expression { params.DEPLOY_ENV == 'dev' }
+                    expression { params.DEPLOY_ENV == 'test' }
+                    expression { params.DEPLOY_ENV == 'prod' }
+                }
+            }
+            steps {
+                script {
+                    echo "Деплой мониторинг окружения ${params.DEPLOY_ENV} (namespace: monitoring)"
+
+                    sh """
+                        # Устанавливаем Zipkin
+                        helm install zipkin bitnami/zipkin -n monitoring --create-namespace -f helm/zipkin/values-zipkin.yaml
+                    """
+                }
+            }
+        }
+
         stage('Деплой') {
             when {
                 anyOf {
