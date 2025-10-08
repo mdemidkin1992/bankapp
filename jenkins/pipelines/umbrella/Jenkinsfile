@@ -222,7 +222,7 @@ pipeline {
                         kubectl apply -f ${WORKSPACE}/helm/prometheus/prometheusrule.yaml
 
                         # Проброс порта для веб-интерфейса Grafana
-                        kubectl port-forward -n monitoring svc/grafana 3000:80
+                        kubectl port-forward -n monitoring svc/prometheus-stack-grafana 3000:80
                     """
                 }
             }
