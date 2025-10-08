@@ -213,7 +213,7 @@ pipeline {
                         kubectl create namespace monitoring || true
 
                         # Устанавливаем Zipkin
-                        helm install zipkin bitnami/zipkin -n monitoring -f helm/zipkin/values-zipkin.yaml
+                        helm install zipkin bitnami/zipkin -n monitoring -f ${WORKSPACE}/helm/zipkin/values-zipkin.yaml
 
                         # Установка Prometheus-Grafana
                         helm install prometheus-stack prometheus-community/kube-prometheus-stack -n monitoring -f helm/prometheus/prometheus-stack-values.yaml

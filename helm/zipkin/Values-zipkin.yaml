@@ -1,7 +1,0 @@
-storageType: mem # указываем способ хранения в памяти
-cassandra:
-  enabled: false # отключаем поднятие Cassandra (использовалась по умолчанию)
-service:
-  type: NodePort # тип сервиса поможет нам раскрыть порт
-  nodePorts:
-    http: 30000 # мы сможем взаимодействовать с Zipkin по адресу http://127.0.0.1:30000
