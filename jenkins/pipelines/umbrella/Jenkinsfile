@@ -210,7 +210,7 @@ pipeline {
 
                     sh """
                         # Создание общего неймспейса
-                        kubectl create namespace monitoring
+                        kubectl create namespace monitoring || true
 
                         # Устанавливаем Zipkin
                         helm install zipkin bitnami/zipkin -n monitoring -f helm/zipkin/values-zipkin.yaml
