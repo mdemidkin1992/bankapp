@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cash-failed-alert
+  namespace: monitoring
+  labels:
+    release: prometheus-stack
+spec:
+  groups:
+    - name: cash.rules
+      rules:
+        - alert: HighCashFailedRate
+          expr: sum(rate(cash_blocked_by_login[1m])) > 10
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Повысилось количество блокировок переводов валюты"
+            description: "Количество блокировок переводов валюты выше 10 в течение последней минуты."

@@ -167,6 +167,8 @@ pipeline {
             steps {
                 sh """
                     helm repo add bitnami https://charts.bitnami.com/bitnami || true
+                    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts || true
+
                     helm repo update
                     helm dependency build ./helm/bankapp
                 """
@@ -207,8 +209,20 @@ pipeline {
                     echo "Деплой мониторинг окружения ${params.DEPLOY_ENV} (namespace: monitoring)"
 
                     sh """
+                        # Создание общего неймспейса
+                        kubectl create namespace monitoring
+
                         # Устанавливаем Zipkin
-                        helm install zipkin bitnami/zipkin -n monitoring --create-namespace -f helm/zipkin/values-zipkin.yaml
+                        helm install zipkin bitnami/zipkin -n monitoring -f helm/zipkin/values-zipkin.yaml
+
+                        # Установка Prometheus-Grafana
+                        helm install prometheus-stack prometheus-community/kube-prometheus-stack -n monitoring -f helm/prometheus/prometheus-stack-values.yaml
+
+                        # Применение настроек алертов
+                        kubectl apply -f helm/prometheus/prometheusrule.yaml
+
+                        # Проброс порта для веб-интерфейса Grafana
+                        kubectl port-forward -n monitoring svc/grafana 3000:80
                     """
                 }
             }

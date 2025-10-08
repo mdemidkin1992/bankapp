@@ -313,3 +313,11 @@ kubectl get pods -n bankapp-dev
 После успешного деплоя приложение будет доступно по адресу: http://bankapp.local
 
 Для удаления деплоя использовать `jenkins/nuke-all.sh`.
+
+## Мониторинг 
+
+Пароль администратора для доступа в Grafana можно получить такой командой:
+```
+kubectl get secret prometheus-stack-grafana -n monitoring -o jsonpath="{.data.admin-password}" | base64 --decode
+```
+

@@ -1,5 +1,6 @@
 package ru.mdemidkin.accounts.service;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -23,6 +24,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MeterRegistry meterRegistry;
 
     public Mono<User> registerNewUser(SignupRequest signupRequest) {
         User createUser = User.builder()
@@ -47,7 +49,15 @@ public class UserService {
     public Mono<UserDto> findByUsername(String username) {
         return userRepository.findByLogin(username)
                 .map(this::mapToUserDto)
-                .switchIfEmpty(Mono.error(new UsernameNotFoundException("Пользователь не найден: " + username)));
+                .doOnSuccess(user -> {
+                    if (user != null) {
+                        meterRegistry.counter("user_successful_logins", "login", username).increment();
+                    }
+                })
+                .switchIfEmpty(Mono.error(() -> {
+                    meterRegistry.counter("user_failed_logins", "login", username).increment();
+                    throw new UsernameNotFoundException("Пользователь не найден: " + username);
+                }));
     }
 
     private UserDto mapToUserDto(User user) {

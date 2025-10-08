@@ -1,5 +1,6 @@
 package ru.mdemidkin.transfer.service;
 
+import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,7 @@ public class TransferService {
     private final BlockersClient blockersClient;
     private final ConvertClient convertClient;
     private final NotificationsProducerService notificationsProducer;
+    private final MeterRegistry meterRegistry;
 
     private static final String SUCCESS_MESSAGE = "Успешный перевод:";
     private static final String FAIL_MESSAGE = "Ошибка перевода:";
@@ -52,7 +54,9 @@ public class TransferService {
                 .flatMap(blocked -> {
                     if (blocked) {
                         notificationsProducer.sendNotificationsMessage(login, new NotificationDto(login, formatMessage(BLOCKED_MESSAGE, transferRequest)));
-
+                        meterRegistry.counter("transfer_blocked_by_login", "login", login).increment();
+                        meterRegistry.counter("transfer_blocked_by_to_account", "toCurrency", transferRequest.getToCurrency()).increment();
+                        meterRegistry.counter("transfer_blocked_by_from_account", "fromCurrency", transferRequest.getFromCurrency()).increment();
                         addErrors(BLOCKED_MESSAGE, login, transferRequest.getToLogin(), transferErrors, transferOtherErrors);
                         return redirectToMain(transferErrors, transferOtherErrors);
                     }
@@ -120,6 +124,9 @@ public class TransferService {
                             .onErrorResume(ex -> {
                                 String errorMessage = formatMessage("Ошибка перевода: " + ex.getMessage(), transferRequest);
                                 notificationsProducer.sendNotificationsMessage(login, new NotificationDto(login, errorMessage));
+                                meterRegistry.counter("transfer_failed_by_login", "login", login).increment();
+                                meterRegistry.counter("transfer_failed_by_to_account", "toCurrency", transferRequest.getToCurrency()).increment();
+                                meterRegistry.counter("transfer_failed_by_from_account", "fromCurrency", transferRequest.getFromCurrency()).increment();
                                 return redirectToMain(transferErrors, transferOtherErrors);
                             });
                 });

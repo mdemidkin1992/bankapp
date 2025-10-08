@@ -1,5 +1,7 @@
 package ru.mdemidkin.transfer.service;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -45,6 +48,9 @@ class TransferServiceTest {
 
     @Mock
     private ConvertClient convertClient;
+
+    @Mock
+    private MeterRegistry meterRegistry;
 
     @InjectMocks
     private TransferService transferService;
@@ -66,6 +72,26 @@ class TransferServiceTest {
 
     @Test
     void processTransfer_whenBlocked_shouldRedirectWithBlockedError() {
+        Counter mockCounter = mock(Counter.class);
+
+        when(meterRegistry.counter(
+                eq("transfer_blocked_by_login"),
+                eq("login"),
+                anyString())
+        ).thenReturn(mockCounter);
+
+        when(meterRegistry.counter(
+                eq("transfer_blocked_by_to_account"),
+                eq("toCurrency"),
+                anyString())
+        ).thenReturn(mockCounter);
+
+        when(meterRegistry.counter(
+                eq("transfer_blocked_by_from_account"),
+                eq("fromCurrency"),
+                anyString())
+        ).thenReturn(mockCounter);
+
         when(blockersClient.sendBlockerRequest(anyString()))
                 .thenReturn(Mono.just(true));
 
@@ -83,6 +109,26 @@ class TransferServiceTest {
 
     @Test
     void processTransfer_whenAccountNotFound_shouldRedirectWithAccountError() {
+        Counter mockCounter = mock(Counter.class);
+
+        when(meterRegistry.counter(
+                eq("transfer_failed_by_login"),
+                eq("login"),
+                anyString())
+        ).thenReturn(mockCounter);
+
+        when(meterRegistry.counter(
+                eq("transfer_failed_by_to_account"),
+                eq("toCurrency"),
+                anyString())
+        ).thenReturn(mockCounter);
+
+        when(meterRegistry.counter(
+                eq("transfer_failed_by_from_account"),
+                eq("fromCurrency"),
+                anyString())
+        ).thenReturn(mockCounter);
+
         when(blockersClient.sendBlockerRequest(anyString()))
                 .thenReturn(Mono.just(false));
         AccountDto missing = AccountDto.builder().exists(false).build();
@@ -106,6 +152,26 @@ class TransferServiceTest {
 
     @Test
     void processTransfer_whenInsufficientFunds_shouldRedirectWithFundsError() {
+        Counter mockCounter = mock(Counter.class);
+
+        when(meterRegistry.counter(
+                eq("transfer_failed_by_login"),
+                eq("login"),
+                anyString())
+        ).thenReturn(mockCounter);
+
+        when(meterRegistry.counter(
+                eq("transfer_failed_by_to_account"),
+                eq("toCurrency"),
+                anyString())
+        ).thenReturn(mockCounter);
+
+        when(meterRegistry.counter(
+                eq("transfer_failed_by_from_account"),
+                eq("fromCurrency"),
+                anyString())
+        ).thenReturn(mockCounter);
+
         when(blockersClient.sendBlockerRequest(anyString()))
                 .thenReturn(Mono.just(false));
         AccountDto from = AccountDto.builder()

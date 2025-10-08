@@ -1,5 +1,7 @@
 package ru.mdemidkin.accounts.service;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +27,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,6 +43,9 @@ class UserServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private MeterRegistry meterRegistry;
 
     @InjectMocks
     private UserService userService;
@@ -91,6 +101,14 @@ class UserServiceTest {
 
     @Test
     void findByUsername_success() {
+        Counter mockCounter = mock(Counter.class);
+
+        when(meterRegistry.counter(
+                eq("user_successful_logins"),
+                eq("login"),
+                anyString()
+        )).thenReturn(mockCounter);
+
         when(userRepository.findByLogin("user1")).thenReturn(Mono.just(existingUser));
 
         UserDto dto = userService.findByUsername("user1").block();
@@ -103,10 +121,24 @@ class UserServiceTest {
 
     @Test
     void findByUsername_notFound() {
+        Counter mockCounter = mock(Counter.class);
+
+        when(meterRegistry.counter(
+                eq("user_failed_logins"),
+                eq("login"),
+                anyString()
+        )).thenReturn(mockCounter);
+
         when(userRepository.findByLogin("nope")).thenReturn(Mono.empty());
 
         assertThrows(UsernameNotFoundException.class,
                 () -> userService.findByUsername("nope").block());
+
+        verify(meterRegistry, times(1)).counter(
+                eq("user_failed_logins"),
+                eq("login"),
+                anyString()
+        );
     }
 
     @Test

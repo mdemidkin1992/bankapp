@@ -2,6 +2,8 @@ package ru.mdemidkin.front.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.composite.CompositeMeterRegistry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,7 +37,8 @@ class AccountsClientWireMockTest {
         wireMock.start();
 
         WebClient webClient = WebClient.builder().build();
-        accountsClient = new AccountsClient(webClient);
+        MeterRegistry meterRegistry = new CompositeMeterRegistry();
+        accountsClient = new AccountsClient(webClient, meterRegistry);
         ReflectionTestUtils.setField(
                 accountsClient,
                 "gateway",

@@ -36,6 +36,7 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-loadbalancer")
     implementation("io.micrometer:micrometer-tracing-bridge-brave")
     implementation("io.zipkin.reporter2:zipkin-reporter-brave")
+    implementation("io.micrometer:micrometer-registry-prometheus")
 
     implementation(project(":common-dto"))
 

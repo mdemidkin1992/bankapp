@@ -1,5 +1,7 @@
 package ru.mdemidkin.cash.service;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,6 +27,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -38,6 +41,9 @@ class CashServiceTest {
 
     @Mock
     private NotificationsProducerService notificationsProducer;
+
+    @Mock
+    private MeterRegistry meterRegistry;
 
     @InjectMocks
     private CashService cashService;
@@ -74,6 +80,20 @@ class CashServiceTest {
     @Test
     void updateCashBalance_notBlocked_failed() {
         // given
+        Counter mockCounter = mock(Counter.class);
+
+        when(meterRegistry.counter(
+                eq("cash_failed_by_login"),
+                eq("login"),
+                anyString())
+        ).thenReturn(mockCounter);
+
+        when(meterRegistry.counter(
+                eq("cash_failed_by_account"),
+                eq("currency"),
+                anyString())
+        ).thenReturn(mockCounter);
+
         when(blockersClient.sendBlockerRequest(anyString()))
                 .thenReturn(Mono.just(false));
         List<String> errors = List.of("err1", "err2");
@@ -98,6 +118,20 @@ class CashServiceTest {
 
     @Test
     void updateCashBalance_blocked() {
+        Counter mockCounter = mock(Counter.class);
+
+        when(meterRegistry.counter(
+                eq("cash_blocked_by_login"),
+                eq("login"),
+                anyString())
+        ).thenReturn(mockCounter);
+
+        when(meterRegistry.counter(
+                eq("cash_blocked_by_account"),
+                eq("currency"),
+                anyString())
+        ).thenReturn(mockCounter);
+
         when(blockersClient.sendBlockerRequest(anyString()))
                 .thenReturn(Mono.just(true));
 

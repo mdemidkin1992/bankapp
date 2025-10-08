@@ -2,6 +2,7 @@ package ru.mdemidkin.front.client;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -21,6 +22,7 @@ import java.util.List;
 public class AccountsClient {
 
     private final WebClient webClient;
+    private final MeterRegistry meterRegistry;
 
     @Value("${services.service-gateway.name}")
     private String gateway;
@@ -84,6 +86,7 @@ public class AccountsClient {
     }
 
     private Mono<List<Currency>> getCurrenciesFallback() {
+        meterRegistry.counter("currencies_not_available").increment();
         return Mono.just(List.of(Currency.RUB));
     }
 
