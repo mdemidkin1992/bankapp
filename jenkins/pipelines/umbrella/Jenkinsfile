@@ -213,10 +213,10 @@ pipeline {
                         kubectl create namespace monitoring || true
 
                         # Устанавливаем Zipkin
-                        helm install zipkin ./helm/zipkin -n monitoring
+                        helm upgrade --install zipkin ./helm/zipkin -n monitoring
 
                         # Установка Prometheus-Grafana
-                        helm install prometheus-stack prometheus-community/kube-prometheus-stack -n monitoring -f ${WORKSPACE}/helm/prometheus/prometheus-stack-values.yaml
+                        helm upgrade --install prometheus-stack prometheus-community/kube-prometheus-stack -n monitoring -f ${WORKSPACE}/helm/prometheus/prometheus-stack-values.yaml
 
                         # Применение настроек алертов
                         kubectl apply -f ${WORKSPACE}/helm/prometheus/prometheusrule.yaml
