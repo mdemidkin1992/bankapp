@@ -1,0 +1,29 @@
+replicaCount: 1
+
+image:
+  repository: docker.elastic.co/kibana/kibana
+  tag: "8.11.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: NodePort
+  port: 5601
+  nodePort: 30561
+
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "250m"
+  limits:
+    memory: "1Gi"
+    cpu: "500m"
+
+elasticsearch:
+  hosts: ["http://bankapp-elasticsearch:9200"]
+
+kibanaConfig:
+  kibana.yml: |
+    server.host: "0.0.0.0"
+    server.shutdownTimeout: "5s"
+    elasticsearch.hosts: ${ELASTICSEARCH_HOSTS}
+    monitoring.ui.container.elasticsearch.enabled: true

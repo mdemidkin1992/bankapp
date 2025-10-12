@@ -1,0 +1,6 @@
+apiVersion: v2
+name: kibana
+description: Kibana for BankApp log visualization
+type: application
+version: 0.1.0
+appVersion: "8.11.0"

@@ -85,6 +85,18 @@ postgresql-notifications:
     username: postgres
     password: postgres
 
+# ELK Stack for Logging
+elasticsearch:
+  enabled: true
+  persistence:
+    enabled: false  # Set to true for production
+
+logstash:
+  enabled: true
+
+kibana:
+  enabled: true
+
 # Microservices
 service-gateway:
   enabled: true

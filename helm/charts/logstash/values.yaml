@@ -1,0 +1,94 @@
+replicaCount: 1
+
+image:
+  repository: docker.elastic.co/logstash/logstash
+  tag: "8.11.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5044
+
+resources:
+  requests:
+    memory: "512Mi"
+    cpu: "250m"
+  limits:
+    memory: "1Gi"
+    cpu: "500m"
+
+config:
+  kafka:
+    bootstrapServers: "bankapp-kafka:9092"
+    topic: "bankapp-logs"
+    groupId: "logstash-bankapp"
+  elasticsearch:
+    hosts: ["http://bankapp-elasticsearch:9200"]
+    index: "bankapp-logs-%{+YYYY.MM.dd}"
+
+logstashConfig:
+  logstash.yml: |
+    http.host: "0.0.0.0"
+    xpack.monitoring.enabled: false
+
+logstashPipeline:
+  logstash.conf: |
+    input {
+      kafka {
+        bootstrap_servers => "${KAFKA_BOOTSTRAP_SERVERS}"
+        topics => ["${KAFKA_TOPIC}"]
+        group_id => "${KAFKA_GROUP_ID}"
+        codec => json
+      }
+    }
+
+    filter {
+      # Parse JSON if not already parsed
+      if [message] =~ /^\{/ {
+        json {
+          source => "message"
+        }
+      }
+
+      # Extract trace and span IDs
+      if [trace] {
+        mutate {
+          add_field => { "trace_id" => "%{[trace][id]}" }
+          add_field => { "span_id" => "%{[span][id]}" }
+        }
+      }
+
+      # Mask sensitive data (account numbers, passwords)
+      mutate {
+        gsub => [
+          "message", "\d{16,19}", "****-****-****-****",
+          "message", "password[\"']?\s*[:=]\s*[\"']?[^\s,\"']+", "password=***"
+        ]
+      }
+
+      # Add environment tag
+      if [service][environment] {
+        mutate {
+          add_field => { "environment" => "%{[service][environment]}" }
+        }
+      }
+
+      # Parse timestamp
+      date {
+        match => [ "@timestamp", "ISO8601" ]
+        target => "@timestamp"
+      }
+    }
+
+    output {
+      elasticsearch {
+        hosts => ${ELASTICSEARCH_HOSTS}
+        index => "${ELASTICSEARCH_INDEX}"
+        codec => json
+      }
+
+      # Debug output to stdout
+      stdout {
+        codec => rubydebug
+      }
+    }

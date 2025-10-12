@@ -45,6 +45,22 @@ dependencies:
     repository: "file://../charts/postgresql-notifications"
     condition: postgresql-notifications.enabled
 
+  # ELK Stack for Logging
+  - name: elasticsearch
+    version: "0.1.0"
+    repository: "file://../charts/elasticsearch"
+    condition: elasticsearch.enabled
+
+  - name: logstash
+    version: "0.1.0"
+    repository: "file://../charts/logstash"
+    condition: logstash.enabled
+
+  - name: kibana
+    version: "0.1.0"
+    repository: "file://../charts/kibana"
+    condition: kibana.enabled
+
   # Service Dependencies
   - name: service-gateway
     version: "0.1.0"

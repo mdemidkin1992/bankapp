@@ -2,18 +2,25 @@
 <Configuration status="WARN">
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level: %msg%n"/>
+            <JsonTemplateLayout eventTemplateUri="classpath:EcsLayout.json"/>
         </Console>
         <Kafka name="Kafka" topic="bankapp-logs">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level: %msg%n"/>
+            <JsonTemplateLayout eventTemplateUri="classpath:EcsLayout.json">
+                <EventTemplateAdditionalField key="service.name" value="service-gateway"/>
+                <EventTemplateAdditionalField key="service.environment" value="${env:ENVIRONMENT:-dev}"/>
+            </JsonTemplateLayout>
             <Property name="bootstrap.servers">bankapp-kafka:9092</Property>
         </Kafka>
     </Appenders>
     <Loggers>
         <Root level="info">
             <AppenderRef ref="Kafka"/>
+            <AppenderRef ref="Console"/>
         </Root>
-        <Logger name="org.apache.kafka" level="INFO" >
+        <Logger name="org.apache.kafka" level="WARN" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="org.springframework.kafka" level="WARN" additivity="false">
             <AppenderRef ref="Console"/>
         </Logger>
     </Loggers>

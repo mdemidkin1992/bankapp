@@ -316,8 +316,61 @@ kubectl get pods -n bankapp-dev
 
 ## Мониторинг 
 
+#### Grafana
+
 Пароль администратора для доступа в Grafana можно получить такой командой:
 ```
 kubectl get secret prometheus-stack-grafana -n monitoring -o jsonpath="{.data.admin-password}" | base64 --decode
 ```
 
+Проброс порта для веб-интерфейса Grafana
+```bash
+kubectl port-forward -n monitoring svc/prometheus-stack-grafana 3000:80
+```
+
+Импортируем Spring Boot statistics дэшборд ()
+
+## ELK Stack для BankApp
+
+### Архитектура
+
+```
+Микросервисы → Kafka (bankapp-logs) → Logstash → Elasticsearch → Kibana
+```
+
+### Компоненты
+
+- **Elasticsearch**: Хранение логов (StatefulSet)
+- **Logstash**: Обработка логов из Kafka, маскировка чувствительных данных
+- **Kibana**: Визуализация логов (доступ через NodePort 30561)
+
+### Формат логов
+
+JSON с trace ID и span ID для связи с Zipkin:
+
+```json
+{
+  "service.name": "service-accounts",
+  "trace.id": "abc123",
+  "span.id": "xyz789",
+  "log.level": "INFO",
+  "message": "..."
+}
+```
+
+### Развертывание
+
+```bash
+# Через umbrella chart (ELK включен по умолчанию)
+helm upgrade --install bankapp helm/bankapp -n bankapp-dev
+
+# Доступ к Kibana
+open http://localhost:30561
+```
+
+### Настройка Kibana
+
+1. Откройте Kibana
+2. Создайте Index Pattern: `bankapp-logs-*`
+3. Выберите Time Field: `@timestamp`
+4. Перейдите в **Discover**
