@@ -29,11 +29,11 @@ pipeline {
             }
         }
 
-        stage('Получение исходников') {
-            steps {
-                checkout scm
-            }
-        }
+//         stage('Получение исходников') {
+//             steps {
+//                 checkout scm
+//             }
+//         }
 
         stage('Сборка всех проектов') {
             steps {
